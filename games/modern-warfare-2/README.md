@@ -42,7 +42,7 @@ replaced, and players who tried it found it rough.
   ([install guide](https://forum.alterware.dev/t/iw4x-singleplayer-install-guide/383)).
 - **IW4x** ([iw4x/iw4x-client](https://github.com/iw4x/iw4x-client)): open-source multiplayer
   client, not the campaign.
-- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.2.0-alpha):
+- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.3.0-alpha):
   this project, for the 64-bit build.
 
 ## How the game works (for co-op)
@@ -107,7 +107,7 @@ replaced, and players who tried it found it rough.
 
 ## What we changed
 
-All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (v0.2.0-alpha and later commits on main; v0.2.0-alpha ships an install archive with `.bat` launchers for host, continue and join):
+All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2026-10-21: an install archive with `winmm.dll` and the `mw2coop` folder; hosting and joining are in the game's menus, the `.bat` launchers of v0.2.0-alpha are gone):
 - `winmm.dll` proxy that checks the build, runs console commands from a file, watches dvars
   and memory, logs co-op packets and script runtime errors.
 - Script loader replacement (`Scr_AddSourceBuffer`): own scripts plus load-time patches of the
@@ -128,7 +128,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (v0.2.0-alpha and later co
   swap by holding Use, ride end and crash for both, Shepherd's scene for both; Wolverines!
   opening and closing Humvee rides.
 - Joining by address: `mw2coop_party_join` stands in for the Steam lobby step that activates
-  the client's party (the v0.2.0-alpha join launcher runs it before `connect`).
+  the client's party (QA and console joins run it before `connect`; the in-game join does the same).
 - QA-only helper to pair two copies on one Steam account: a shifted XUID (`!xuid_add`; the host
   ignores a `coopConnect` from its own XUID). No shipped launcher uses it.
 - In-game co-op menus (the `.bat` launchers are gone): host lobby with mission select and access
@@ -202,7 +202,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (v0.2.0-alpha and later co
 ## How to play
 
 Alpha: see the mw2_coop README. Both players copy `winmm.dll` and the `mw2coop` folder from the
-release archive into the game folder; the host picks Campaign -> co-op, the partner joins from
+[v0.3.0-alpha release](https://github.com/stxlvn/mw2_coop/releases) archive into the game folder; the host picks Campaign -> co-op, the partner joins from
 the list, by address or by Steam invite.
 
 ## Known issues
