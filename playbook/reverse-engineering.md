@@ -76,6 +76,19 @@ you a log, a script channel and native commands in one step. Worked out on Far C
   loop hook), not once; smooth towards the target; keep the puppet invincible; and read
   memory with `ReadProcessMemory` in chunks so a scan cannot crash the game. See
   [lessons.md](lessons.md) items 26 to 28.
+- **A fixed asset pool overflows when co-op loads more.** Loading an extra content pack (in
+  Modern Warfare 2 the Spec Ops zone that holds the co-op player bodies) on a heavy level
+  can hit an engine limit ("Exceeded limit of 1350 'loaded_sound' assets"). Find the message's
+  string, the function that raises it, and the per-type tables it indexes (sizes, pool
+  pointers). IW engine pools are free lists (`{ head; entries[n] }`, a free entry's first
+  bytes point to the next), so new entries can be linked in front of the list at runtime
+  without moving the ones in use; do it once, while no zone is loading. Trying other packs
+  first did not help: every one pushed the same pool over
+  ([games/modern-warfare-2](../games/modern-warfare-2/README.md)).
+- **Console button commands may not drive a player.** In Modern Warfare 2, `+activate`,
+  `+forward` and `+gostand` queued into the console buffer by a DLL moved neither game copy's
+  player, even with the window in front. QA bots there move players through script
+  (positions, angles, the notifies a button would send) and real input is checked by hand.
 
 ## What to map for co-op
 
