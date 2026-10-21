@@ -823,6 +823,40 @@ eye; his body from the ground. Lip sync: voice and lips seen out of sync on both
 screens; `timescale` stayed 1 the whole scene except the throw's slow motion (back to 1), so not
 the cause; open.
 
+## QA bots press real buttons (2026-10-21)
+
+Console `+activate` did nothing because the 64-bit build has no such console command (`!cmds`:
+168 commands; of the `+` ones only `+moveup`, `+speed`, `+melee_breath`, `+throw`,
+`+nightvision`, `+incAnimWeight`, `+decAnimWeight`, registered at rva 0xcf5d0 and 0xd3240).
+How a key works (Ghidra, iw4sp.exe build 25374375):
+- Bind name table at rva 0x3be770, 0x4c `char *` entries: index 0 empty, `+attack` 1, `-attack`
+  2, `+melee` 3, ... `+forward` 0x1b, `+back` 0x1d, `+gostand` 0x19, `+activate` 0x31,
+  `-activate` 0x32, `+reload` 0x33, ... then `togglemenu`, `weapnext`, ... `leaveads` 0x4b.
+- rva 0xd1810: name -> index (0 if none). Per-key bind index at 0x5300f0 (stride 0x18,
+  256 keys); rva 0xd17f0 reads it; `bind` (rva 0xd13d0) writes it.
+- rva 0xce450 `(localClient, index, key)`: the switch over the index. Odd index: kbutton down
+  (rva 0xd0620), even: up (rva 0xd06f0); a few run actions (actionslots, stance). It returns
+  early unless the client is in a level (bytes 0x5dac53 and 0x40cac8). kbutton (0x14 bytes):
+  `int down[2]; int downtime; int msec; char active; char wasPressed`; the array starts at
+  0x52fbc0 (`+left` 0x52fbc0, `+forward` 0x52fbe8, `+attack` 0x52fcd8, `+activate` 0x52fd3c).
+- rva 0xd03a0 builds the usercmd: with key catcher 0x10 (0x533cb0) set it only does stance;
+  otherwise buttons (rva 0xce200: attack 0x1, melee 0x4, Use 0x8, reload 0x10, usereload 0x20,
+  prone 0x100, ...), key moves (rva 0xcf900, forward/back/strafe from kbutton state, rva
+  0xcfbc0) and mouse. Key moves are skipped while the player state's flag 0x800 (0x535d44,
+  frozen controls) is set.
+- mw2_coop: console command `mw2coop_bind +activate` calls 0xce450 with key 0x1ff (no keyboard
+  sends it); QA scripts set `mw2coop_qa_press "<player> <button> <ms> <n>"` and only the DLL of
+  that player's machine (host = player 1) presses and lets go after ms.
+
+Results: `buttons` (S.S.D.D., Whiskey Hotel) and `pickups` (rifle, pistol, frag box) all PASS on
+both machines with real presses. Found with real input:
+- S.S.D.D.: player 1's range place (48 units left of `player_start_range`) was 10 units further
+  back than player 2's and inside the bay's back wall: traces from him were blocked to the
+  sides and back, Forward moved him 0 units in five tries. Now 16 units further forward; QA
+  checks both are free (`qa_stuck`).
+- `maps\_introscreen` freezes `level.player` only (S.S.D.D.: 12 s): player 2 can walk and take
+  the pistol while player 1 cannot. Not changed yet.
+
 ## Status
 
 Next: lip sync (off on both screens), Endgame boat, the nrend anim_loop error; profile records.

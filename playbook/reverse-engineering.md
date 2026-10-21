@@ -88,10 +88,17 @@ you a log, a script channel and native commands in one step. Worked out on Far C
   without moving the ones in use; do it once, while no zone is loading. Trying other packs
   first did not help: every one pushed the same pool over
   ([games/modern-warfare-2](../games/modern-warfare-2/README.md)).
-- **Console button commands may not drive a player.** In Modern Warfare 2, `+activate`,
-  `+forward` and `+gostand` queued into the console buffer by a DLL moved neither game copy's
-  player, even with the window in front. QA bots there move players through script
-  (positions, angles, the notifies a button would send) and real input is checked by hand.
+- **Give QA bots real buttons through the key bindings.** In Modern Warfare 2 (64-bit),
+  `+activate`, `+forward` and `+gostand` are no console commands at all, so queuing them in the
+  console buffer did nothing. A key runs its binding by index instead: the names sit in one
+  table (`+attack`, `-attack`, ... `+activate`, `-activate`; find it from the strings), a small
+  function turns a name into its place in the table, and one switch over the index holds a
+  `kbutton` down or lets it go. Calling that switch from a DLL console command presses the
+  button exactly as a key does: it reaches the server in that player's own input. In lockstep
+  co-op both PCs run the test script, so only the machine of the player who presses may act on
+  it. With real input the bots found what script moves had hidden: a player placed inside a
+  wall could not walk, and the level intro froze only player 1
+  ([games/modern-warfare-2](../games/modern-warfare-2/README.md)).
 
 ## What to map for co-op
 

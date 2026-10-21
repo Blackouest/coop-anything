@@ -190,9 +190,20 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
     Takedown, Wolverines!: 9/9 PASS each; Just Like Old Times loads and spawns (PASS). The other
     levels were not rerun on this build.
   - `look` on Loose Ends: both bodies in the forest uniform on both screens (screenshots).
-- Bots cannot press buttons: console `+activate`, `+forward`, `+gostand` sent by the DLL move
-  neither copy's player, even with the window in front. Scenarios drive players through script
-  (positions, angles, scripted pickups and notifies); real input is checked by hand.
+- Bots press real buttons (after v0.3.0-alpha): a scenario asks for a press with
+  `press( player, "activate", ms )` and that player's own machine runs the key binding
+  (`mw2coop_bind +activate`), so Use or Forward reaches the server in his input like a key press.
+  `+activate` and `+forward` are no console commands in this build, which is why queuing them
+  did nothing before. Runs on 2026-10-21, host and client, identical results on both:
+  - `buttons` on S.S.D.D. and Whiskey Hotel: each player walks forward on a Forward press, the
+    server sees his Use button and not the other player's: all PASS.
+  - S.S.D.D. `pickups` with real input: both take the rifle and the pistol off the tables with
+    one Use press each, both walk up to the frag box with Forward and get 4 frags: all PASS.
+  - Found with it: player 1's place in S.S.D.D.'s sandbag bay was inside the bay's back wall
+    (Forward moved him 0 units); he now stands 16 units further forward. The level intro
+    (`maps\_introscreen`) freezes player 1 only.
+  - Older scenarios still drive players through script (positions, angles, notifies); real input
+    on those set pieces is checked by hand.
 - 2026-10-19: `intro` ended the session at the rifle hand-out ("no viewmodel set for player
   0"); fixed by setting player 2's first-person hands.
 - Earlier run (no QA script): both copies in S.S.D.D. in co-op for about 110 s, the client
@@ -214,6 +225,10 @@ the list, by address or by Steam invite.
   the players ended 2255 units apart (not looked into yet).
 - Campaign records (missions unlocked in the menu) are not updated in co-op.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
+- The level intro (mission title on black) freezes player 1 only: player 2 can walk and pick up
+  weapons meanwhile.
+- v0.3.0-alpha: in S.S.D.D. player 1 starts the firing range inside the sandbag bay's back wall
+  and cannot walk out of it (fixed after the release, not released yet).
 
 ## Next steps
 
