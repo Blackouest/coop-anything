@@ -6870,14 +6870,15 @@
   engine: IW 4.0 (Call of Duty)
   project: mw2_coop
   url: https://github.com/stxlvn/mw2_coop
-  other_urls: []
+  other_urls:
+  - https://github.com/stxlvn/mw2_coop/releases
   kind: mod
-  status: prototype
+  status: alpha
   coop_scope:
     players_visible: yes
     story: partial
     enemies: yes
-    world_state: unknown
+    world_state: yes
     items: per-player
   players: 2
   networking: direct-ip
@@ -6889,11 +6890,15 @@
     game's menus (lobby, LAN list, address, Steam invite). Reworked for two players so far S.S.D.D.,
     Team Player, Wolverines!, Takedown's car, The Only Easy Day's swim, Cliffhanger's climb and
     snowmobiles, No Russian, Second Sun's crash and ISS, Endgame's boat and knife fight; enemies
-    fight both players. In-game QA on two copies. Not played through end to end yet. Write-up in
+    fight both players. The game's co-op runs in lockstep (both PCs run the same level), so the world
+    is shared. In-game QA on two copies. Not played through end to end yet. Write-up in
     games/modern-warfare-2.
   sources:
   - https://github.com/stxlvn/mw2_coop
+  - https://github.com/stxlvn/mw2_coop/releases
+  - https://github.com/cranebeaker/coop-anything/tree/main/games/modern-warfare-2
   checked: '2026-10-21'
+  made_with_coop_anything: true
 - game: Celeste
   year: 2018
   engine: XNA/FNA
