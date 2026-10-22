@@ -121,3 +121,49 @@ network), Steam/Spacewar relay later. Full design and milestones in
 - DAO engine lineage discussion / wiki: https://en.wikipedia.org/wiki/Dragon_Age:_Origins
 - xoreos: https://github.com/xoreos/xoreos
 - Steam app: https://store.steampowered.com/app/47810/Dragon_Age_Origins__Ultimate_Edition/
+
+
+## 2026-10-23 — combat arbitration, death/revive, rejoin, in-game Event Log
+
+All verified in the game on the isolated test install; the scripts named are in
+the `dao-coop` repository.
+
+- **Combat arbitration** (`tools\attack-test.ps1`, PASS). The guest's
+  `dao::commands::OnStart` sees its controlled creature's attack order; the
+  plugin turns it into an AttackRequestPacket (request id, attacker, target)
+  instead of letting the local game attack. The host validates (known guest,
+  monotonic request id, both objects exist, target alive, same area, hostile),
+  calls `dao::orders::Attack` in its own game and answers with a
+  AttackResultPacket; the guest retries the same id twice on a bad-attacker
+  answer. The host repeats the order every ~120 frames so the swing completes;
+  position mirroring is skipped only during the first 30 frames of a swing.
+  `tools\demo-fight.ps1` shows both games fighting the same ogre.
+- **Death and revival** (`tools\death-test.ps1`, PASS). A fallen host player
+  does not end the world while a party member is alive; after the fight
+  `RevivePartyAfterFight` sets fallen party members from zero to maximum health
+  and returns control to the host's avatar. A corpse left in the hostile table
+  is not "a fight in progress" any more (this kept revive from firing).
+- **Guest rejoin** (`tools\reload-test.ps1`, PASS). When the host loads
+  another save mid-session, its `OnGameLoaded` (second and later loads) marks
+  the world reloaded, re-saves the transfer slot and serves it again; the guest
+  sees the flag, resets its join state, receives and loads the new slot
+  (loading screen) and re-selects its party member.
+- **In-game Event Log** (`tools\ui-shot.ps1`, `tools\ui-join-shot.ps1`, PASS).
+  A plugin-owned SWF 8 HUD screen: ActionScript 2 source
+  (`ui/eventlog/frame_1/DoAction.as`) is compiled by FFDec into
+  `ui/coop_eventlog.swf` with the game's `$TitleFont`/`$BodyFont` imported from
+  `gfxfontlib.swf`; the pipeline and the shell generator are adapted from
+  DAOTurnBased's `tools/movie.py` (GPLv3, the same author as DAOLib). The
+  plugin adds the screen with `dao::gui::AddScreen(L"CoopEventLog",
+  L"coop_eventlog", dao::gui::kLayerHud)` and `ShowScreen`, then pushes
+  `EventLog`'s last eight lines plus their categories and a revision through
+  `Movie::SetArray`/`SetVariable`; the movie redraws only on a new revision.
+  The panel lays itself out from `dao::world::ScreenSize()` in screen pixels,
+  has ALL/COMBAT/MULTI/SYSTEM filter tabs and folds to its latest line on a
+  click. Screenshots in `dao-coop/docs/images/`.
+- **Creature names in the log**: `dao::script::api::GetName` (script command
+  275) gives "Айдан", "Морриган", "Огр"; the log is UTF-8 and the UI bridge
+  widens it with `MultiByteToWideChar` for AS2.
+- Also verified earlier in the same session: damage/death channel, release
+  package on the LAN address, pause agreement. `docs/STATUS.md` in the project
+  repository has the evidence for each round.
