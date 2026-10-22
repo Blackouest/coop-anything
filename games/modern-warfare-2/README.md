@@ -17,8 +17,8 @@ players: S.S.D.D. (each takes his own weapons), Team Player's convoy, the Humvee
 Wolverines!, Takedown's car, The Only Easy Day's swim and stealth kill, Cliffhanger's ice climb
 and snowmobiles, No Russian's elevator, cover and ending, the crash site and ISS of Second Sun,
 Endgame's boat chase and the final knife fight. Enemies fight both players; both play the
-difficulty the host picks. Every mission's start points were toured by bots on two copies. Other
-set pieces are still written for one player, and nobody has played the whole campaign through
+difficulty the host picks. Every mission's start points were toured by bots on two copies, and every
+set piece of the campaign is reworked for two; nobody has played the whole campaign through
 together yet.
 The older COD-MOD campaign co-op pack only runs on the 32-bit build that the 2026 update
 replaced, and players who tried it found it rough.
@@ -254,8 +254,6 @@ the list, by address or by Steam invite.
 
 ## Known issues
 
-- Set pieces not reworked yet are scripted for player 1 (scenes, some triggers); player 2 is kept
-  next to him, but some scenes show only to player 1.
 - Global screen effects (slow motion, field of view, vision sets) show on both screens.
 - Campaign records (missions unlocked in the menu) are not updated in co-op.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
@@ -267,6 +265,6 @@ the list, by address or by Steam invite.
 
 - Checkpoints in every level.
 - Saved progress per partner (an id per player), with a warning when continuing with another.
-- Rework the remaining one-player set pieces found by the tour; play the campaign through.
+- Play the campaign through together end to end.
 - Enemy scaling for two players; later, support the 32-bit build.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.

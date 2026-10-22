@@ -6887,7 +6887,7 @@
   qa: automated
   notes: Beta (v0.4.0-beta), playable. MIT mod for the 64-bit Steam build. A winmm.dll proxy plus load-time
     GSC patches on top of the game's own lockstep Spec Ops co-op netcode, hosted and joined from the
-    game's menus (lobby, LAN list, address, Steam invite). Reworked for two players so far S.S.D.D.,
+    game's menus (lobby, LAN list, address, Steam invite). Every set piece is reworked for two players, among them S.S.D.D.,
     Team Player, Wolverines!, Takedown's car, The Only Easy Day's swim, Cliffhanger's climb and
     snowmobiles, No Russian, Second Sun's crash and ISS, Loose Ends' betrayal, Endgame's boat and knife
     fight; enemies fight both players, and both play the difficulty the host picks. The game's co-op runs in lockstep (both PCs run the same level), so the world
