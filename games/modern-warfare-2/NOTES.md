@@ -862,6 +862,32 @@ both machines with real presses. Found with real input:
   DisableWeapons and EnableWeapons on `level.player` in the 12 intro functions go to every
   player. Each of them lifts its own freeze (no early return in between). QA `introfreeze`.
 
+## Loose Ends: Shepherd's betrayal for two players (2026-10-22)
+
+Scene (estate.gsc `ending_moments()`): at the LZ a mortar drops Roach (`birchfield_knockout`,
+flag `play_ending_sequence`); Ghost drags him on rig `playerview` (anim `estate_ending_drag`,
+`PlayerLinkToDelta` arcs 30) while he fights on his back with an AK; blackout; at the Pave Low
+(`estate_ending_part1`) Ghost pulls him up, Shepherd draws (`pistol_pullout`), fires at him
+(`shepherd_fire2`: `DoDamage(99 / damagemultiplier)` with the death shield on) and at Ghost
+(`shepherd_fire1`); blackout; `estate_ending_part2`: two men throw Roach's body
+(`body_ending`), then Ghost's, into a pit; gasoline, fire, `end_the_mission`. Everything is on
+`level.player`. Before: player 2 stayed where he was (12,000 units away at start `ending`) and
+saw nothing. COD-MOD: only freeze and death shield for both at the knockout; its attempts to link
+both players to the rig are commented out.
+Owner's design (2026-10-22): as in COD-MOD as he remembers it, player 2 invisible in the
+cutscenes and thrown with Roach in the one throw; Shepherd's shot hits player 2 as well (he
+sees from Roach's eyes, the gun points at him), then a black screen without text.
+Done (tools/gen_estate_patches.py, `maps\_mw2coop_estate`): every `level.player` statement of
+`ending_moments`, `ending_gasoline_sequence`, `ending_passing_out`, `ending_slowmo`,
+`ending_mortarhit_ghost_sequence`, `startEnding`, `birchfield_knockout` runs for each player,
+except Shepherd's hit and its rumbles, the damage watch, the breathing sound and the blur cycle's
+pacing; both lose their model function (`SetModelFunc( undefined )`: Hide does not hide a co-op
+player) and names; player 2 takes the same hit after Roach's, then a client black overlay
+(sort -1, under the subtitles) fades in over 0.3 s and out with the toss's `restoreVision`.
+QA `betrayal`: with test god mode on, the hit does nothing (health stays 100, for player 1 too):
+run it with `MW2COOP_GOD=0`. The ending's death shield sends no `damage` notify; the test reads
+the lowest health instead.
+
 ## Status
 
 Next: lip sync (off on both screens), Endgame boat, the nrend anim_loop error; profile records.

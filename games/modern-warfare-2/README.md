@@ -148,6 +148,11 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
   falling helicopters, Endgame's knife fight (whoever strikes first plays it, the other is
   stunned and watches), Endgame's boat (first aboard drives, the other lies at the bow across from
   Price on a body with Price's boat animations and shoots where he looks; Price keeps his side).
+- Loose Ends, Shepherd's betrayal (after v0.3.0-alpha, not released yet): both players go through
+  the ending as Roach, held on his view with no bodies or names of their own (Ghost's drag while
+  fighting on his back, the LZ, the body toss, the fire). Shepherd's shot hits both; player 2's
+  screen then goes black until the bodies are thrown, and both go in the one throw (only Roach's
+  and Ghost's bodies are seen). COD-MOD left player 2 out of this scene.
 - S.S.D.D.: both start inside the range's sandbag bay; each takes his own rifle and pistol off the
   table (another lies there until both have one; holders near it keep full ammo so they cannot
   pick it up as ammo) and his own frags. COD-MOD let only one player take the rifle.
@@ -210,6 +215,10 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
     Exodus (on Takedown, No Russian and The Only Easy Day both ride something under the title:
     not checked); `pickups` (all three starts), `buttons`, `takedown`, `oilrig`, `dcemp`, `intro`:
     all PASS.
+  - 2026-10-22, Loose Ends `betrayal` (start `ending`, god mode off): the ending runs to the
+    mission's end (113 s), both players at Roach's place and held all through, nobody down,
+    Shepherd's shot hits both (health down to 2): all PASS; screenshots of player 2 in the drag,
+    at the LZ and at the body toss.
   - Older scenarios still drive players through script (positions, angles, notifies); real input
     on those set pieces is checked by hand.
 - 2026-10-19: `intro` ended the session at the rifle hand-out ("no viewmodel set for player
@@ -240,7 +249,7 @@ the list, by address or by Steam invite.
 ## Next steps
 
 - Rerun the spawn and kit check on the levels not covered by this build.
-- Survey every remaining set piece for two players (gulag, contingency, estate, boneyard,
-  af_caves, the Washington levels).
+- Survey every remaining set piece for two players (gulag, contingency, the rest of estate,
+  boneyard, af_caves, the Washington levels).
 - Enemy scaling for two players (owner's plan); later, support the 32-bit build.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.
