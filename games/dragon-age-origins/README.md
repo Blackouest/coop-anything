@@ -109,7 +109,7 @@ design; `docs/TESTING.md` the test plan.
 | M8 | **Death and revival of a player** | `tools\death-test.ps1` **PASS**: the host player is killed on purpose (test hook), the host's world keeps running while the guest/party is alive (state lines continue), the hostile is then defeated through the test hook, the revive path sets fallen party members back to their maximum health and returns control to the host's avatar (avatar above zero health afterwards). Fix found by the test: a corpse left in the hostile table no longer counts as an ongoing fight |
 | M9 | **Guest rejoin after the host loads another save** | `tools\reload-test.ps1` **PASS**: the host loaded a second save mid-session; the host re-saved the transfer slot and served it again, the guest saw the world-reloaded flag, reset its join state, received and loaded the new slot (loading screen) and re-selected its party member — no restart |
 | M10 | **In-game Event Log panel from the plugin's own SWF** | `tools\ui-shot.ps1` and `tools\ui-join-shot.ps1`: an ActionScript 2 panel (`ui/eventlog/frame_1/DoAction.as`) is compiled into `ui/coop_eventlog.swf` (SWF 8, the game's `$TitleFont`/`$BodyFont` imported from `gfxfontlib.swf`) with FFDec, added as a HUD screen through `dao::gui::AddScreen`, and filled from `EventLog` through `Movie::SetArray`/`SetVariable` on a revision counter; screenshots show the sample lines, a real "Another player joined the game." event, combat lines with creature names, and the ALL/COMBAT/MULTI/SYSTEM filter tabs |
-| M11 | **Release package 0.7.0 with the event log screen, re-tested on the release build** | `tools\\package.ps1 -Version 0.7.0` built `dao-coop-0.7.0.zip` (7.0 MB: loader, address files, plugin, the SWF screen beside it, install notes, `daocoop.ini.example`); on that release build `tools\\attack-test.ps1` (guest attack request accepted and resolved by the host) and `tools\\reload-test.ps1` (host loads another save, guest reloads and rejoins) both **PASS** |
+| M11 | **Release package 0.7.0 with the event log screen, re-tested on the release build** | `tools\\package.ps1 -Version 0.7.0` built `dao-coop-0.7.0.zip` (7.0 MB: loader, address files, plugin, the SWF screen beside it, install notes, `daocoop.ini.example`); on that release build `tools\attack-test.ps1` (guest attack request accepted and resolved by the host) and `tools\reload-test.ps1` (host loads another save, guest reloads and rejoins) both **PASS** |
 
 ## QA
 
@@ -185,5 +185,6 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 3. Area transitions with object-id alignment (`OnAreasBuild`); a host/join
    flow beyond the ini file; the automated suite extended to the combat and
    transition scenarios.
+
 
 
