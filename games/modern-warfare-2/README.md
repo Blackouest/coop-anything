@@ -200,8 +200,16 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
   - S.S.D.D. `pickups` with real input: both take the rifle and the pistol off the tables with
     one Use press each, both walk up to the frag box with Forward and get 4 frags: all PASS.
   - Found with it: player 1's place in S.S.D.D.'s sandbag bay was inside the bay's back wall
-    (Forward moved him 0 units); he now stands 16 units further forward. The level intro
-    (`maps\_introscreen`) freezes player 1 only.
+    (Forward moved him 0 units), and the level intro (`maps\_introscreen`) held player 1 only:
+    player 2 walked and took a pistol under the title. Fixed: both stand where COD-MOD puts its
+    two players (player 1 on the left place by the bags, player 2 on the level's start), and
+    every intro holds both players.
+  - 2026-10-22: `bay` on every range start (default, `timed_ads`, `bullet_penetration`, `frag`):
+    both inside the sandbags, not stuck; `introfreeze`: under the title a real Forward press moves
+    neither player and both walk afterwards on S.S.D.D., Whiskey Hotel, The Hornet's Nest and
+    Exodus (on Takedown, No Russian and The Only Easy Day both ride something under the title:
+    not checked); `pickups` (all three starts), `buttons`, `takedown`, `oilrig`, `dcemp`, `intro`:
+    all PASS.
   - Older scenarios still drive players through script (positions, angles, notifies); real input
     on those set pieces is checked by hand.
 - 2026-10-19: `intro` ended the session at the rifle hand-out ("no viewmodel set for player
@@ -225,10 +233,9 @@ the list, by address or by Steam invite.
   the players ended 2255 units apart (not looked into yet).
 - Campaign records (missions unlocked in the menu) are not updated in co-op.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
-- The level intro (mission title on black) freezes player 1 only: player 2 can walk and pick up
-  weapons meanwhile.
 - v0.3.0-alpha: in S.S.D.D. player 1 starts the firing range inside the sandbag bay's back wall
-  and cannot walk out of it (fixed after the release, not released yet).
+  and cannot walk out of it, and the level intro (mission title on black) holds player 1 only
+  (both fixed after the release, not released yet).
 
 ## Next steps
 

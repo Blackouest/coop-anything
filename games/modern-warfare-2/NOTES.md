@@ -852,10 +852,15 @@ Results: `buttons` (S.S.D.D., Whiskey Hotel) and `pickups` (rifle, pistol, frag 
 both machines with real presses. Found with real input:
 - S.S.D.D.: player 1's range place (48 units left of `player_start_range`) was 10 units further
   back than player 2's and inside the bay's back wall: traces from him were blocked to the
-  sides and back, Forward moved him 0 units in five tries. Now 16 units further forward; QA
-  checks both are free (`qa_stuck`).
-- `maps\_introscreen` freezes `level.player` only (S.S.D.D.: 12 s): player 2 can walk and take
-  the pistol while player 1 cannot. Not changed yet.
+  sides and back, Forward moved him 0 units in five tries. Now both stand where COD-MOD puts
+  its players (owner: "in COD-MOD both stand right"): player 1 at -2515.2 5190.2 (67 units left
+  of the start, 36 forward: bags 20 ahead, wall 23 behind), player 2 on the start (bags 42
+  ahead). The bay (player traces): from 101 units left to 28 right of the start; the back wall
+  slants, 7 to 25 units behind the start's line. QA `bay` checks both inside, not stuck.
+- `maps\_introscreen` froze `level.player` only (S.S.D.D.: 12 s): player 2 could walk and take
+  the pistol while player 1 could not. Patched (tools/gen_intro_patches.py): FreezeControls,
+  DisableWeapons and EnableWeapons on `level.player` in the 12 intro functions go to every
+  player. Each of them lifts its own freeze (no early return in between). QA `introfreeze`.
 
 ## Status
 
