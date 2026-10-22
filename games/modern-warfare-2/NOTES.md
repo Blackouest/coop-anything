@@ -987,7 +987,8 @@ Frames: the `intro` start is the elevator with the mission's intro screen, black
 QA `tour` on two copies (host + client), god mode on, the mod's main of the day (each level run
 once between 07:22 and 13:20; fixes found earlier in the day were in, later ones not). Per level:
 start points (sections), checks passed and failed on the host, runtime script errors host/client,
-frames host/client. Not toured: dc_whitehouse (Whiskey Hotel) and ending (Museum).
+frames host/client. dc_whitehouse (Whiskey Hotel) and ending (Museum) were toured later that day
+(16:55 and 16:58).
 
 | Level | Sections | PASS | FAIL | Script errors | Frames | Notes |
 |---|---|---|---|---|---|---|
@@ -1008,8 +1009,10 @@ frames host/client. Not toured: dc_whitehouse (Whiskey Hotel) and ending (Museum
 | boneyard | 7 | 83 | 2 | 5/5 | 26/26 | `ride_end`: player 2 left behind, fixed (UAZ back seat); errors in the level's vehicle start code |
 | af_caves | 10 | 108 | 1 | 0/0 | 33/33 | walk check at the default start: 25 of 99 units (not looked into) |
 | af_chase | 13 | 39 | 0 | 0/0 | 14/14 | knife dev starts skipped |
+| dc_whitehouse | 4 | 52 | 0 | 0/0 | 16/16 | |
+| ending | 9 | 45 | 9 | 361714/2562846 | 16/16 | player 2 cannot walk (0 of 100 units) or is 1500-1800 units from player 1 at the exhibit starts: not fixed; the errors are the civilians' `_anim::anim_weight` storm, also in single player |
 
 ## Status
 
-Next: lip sync (off on both screens), the nrend anim_loop error, profile records, checkpoints in
-every level (a death late in a level restarts the whole mission).
+Done in v0.4.5-beta: profile records, checkpoints in every level, friendly fire switch. Next: lip
+sync (off on both screens), the nrend anim_loop error, the Museum for player 2.
