@@ -900,6 +900,43 @@ out from that address and to the gateway as well. The router then answered and t
 (UDP 28960). Also, starting a level dropped "hosting" for a moment and the forward was removed and
 added again; removal now waits for a 10 s stop.
 
+## No Russian: Makarov's crew look on the Spec Ops body (2026-10-22)
+
+Player bodies must be Spec Ops co-op bodies (`coop_body_*`): an AI body such as the crew's
+`body_airport_com_c` on a player gives a broken pose (the player animations need the co-op
+skeleton). To dress both players as Makarov's crew, the DLL (`src/transplant.c`) puts the crew's
+mesh on `coop_body_us_army` in memory: the target keeps its bones, hit locations, collision and
+bounds and takes the donor's LODs (surface copies) and material list. Every vertex's bones are
+renumbered by bone name; a donor bone the target lacks takes its nearest ancestor. Heads stay
+separate models (the crew's own heads attach to the co-op body as the co-op heads do).
+
+Observations (dumps with the new `!surfs <xmodel>` QA command, then frames):
+- 64-bit layouts. XModel: boneNames +0x28 (script string indices, interned), parentList +0x30
+  (a byte per non-root bone: its index minus its parent's), materialHandles +0x58, lodInfo[4]
+  +0x60, stride 0x38 (dist +0, numsurfs +4, surfIndex +6, modelSurfs +8, partBits[6] +0x10, surfs
+  +0x28). XModelSurfs: name +0, surfs +8, numsurfs +0x10, partBits +0x14. XSurface, 0x58 bytes:
+  deformed +1, vertCount +2, vertInfo.vertCount[4] +0x18, vertsBlend +0x20, vertListCount +0x30,
+  vertList +0x38 (0x10 each: boneOffset, vertCount, triOffset, triCount, collision tree +8),
+  partBits[6] +0x40. Checked on every surface of three models: the vertex groups add up to
+  vertCount.
+- vertsBlend: vertCount[0] vertices with 1 bone (1 value), [1] with 2 (bone, bone, weight), [2]
+  with 3 (5 values), [3] with 4 (7 values); a bone is stored as its index * 64.
+- partBits: one bit per bone used, bone 0 = the top bit of word 0, without ancestors (17 of 17
+  crew surfaces match that rule, none match "with ancestors").
+- Crew (com_c) 81 bones, 17 surfaces in 4 LODs; ranger 90 bones, 33 surfaces. Six crew bones have
+  no ranger bone of the same name (mapped to ancestors).
+- The swap runs on the main thread (a console command the control thread queues), only while the
+  requested map runs: asset lookups from another thread, or during the next level's zone load,
+  hung the game in earlier work. A level restart finds it done (the target's material list is the
+  donor's); the next level's zone load brings the original model back.
+- Frames (QA `bodyview`, airport start `stairs`): both players in the crew's jacket and trousers,
+  standing, stepping sideways and backing off with the player animations; no visible stretching
+  at the hips, where the two skeletons' bind poses differ by up to 5 units.
+
+Unknown: how it looks in the other LODs at distance (not looked at). Both players share one crew
+body (com_c) with different crew heads; whether the loaded zones hold a second co-op body that
+could take com_d is not checked.
+
 ## Status
 
 Next: lip sync (off on both screens), the nrend anim_loop error, profile records, checkpoints in
