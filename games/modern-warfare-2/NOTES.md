@@ -937,6 +937,23 @@ Unknown: how it looks in the other LODs at distance (not looked at). Both player
 body (com_c) with different crew heads; whether the loaded zones hold a second co-op body that
 could take com_d is not checked.
 
+## No Russian level tour and the squad's line of fire (2026-10-22)
+
+QA `tour` on airport (9 start points, each with frames on both screens): 109 PASS, 0 FAIL. The
+script errors came from the developer start `grigs` and from one `Kill()` under the test god mode.
+That kill is the squad's line of fire: in the lobby (`intro_civilians`) and the massacre
+(`massacre_killers_shotgun`) the level waits on a final trigger with `add_wait(
+::trigger_wait_targetname )`, aborted by the squad's move-on flag, and calls `level.player
+add_call( ::Kill )`; before that, `player_line_of_fire` fires warning MagicBullets at
+`level.player`'s feet while he stands within the line's radius. The trigger fires for either
+player, so player 2 walking in killed player 1, and player 2 got no warning shots. Fix (generated
+by `tools/gen_airport_patches.py`): the warning goes to the player in the line, and the player who
+walks into the final trigger dies (player 1 outside co-op). QA `lineoffire` (start `intro`,
+`MW2COOP_GOD=0`): player 2 walks in, he dies, player 1 lives, the mission fails for both.
+
+Frames: the `intro` start is the elevator with the mission's intro screen, black for its first
+10 s, as in single player.
+
 ## Status
 
 Next: lip sync (off on both screens), the nrend anim_loop error, profile records, checkpoints in
