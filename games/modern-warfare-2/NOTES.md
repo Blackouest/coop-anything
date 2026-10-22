@@ -982,6 +982,33 @@ Frames: the `intro` start is the elevator with the mission's intro screen, black
   Regular): picks 3, 0 and 2 give the level and both players 3, 0 and 2 on both machines; the
   release DLL checked with 3.
 
+## Level tour results (2026-10-22)
+
+QA `tour` on two copies (host + client), god mode on, the mod's main of the day (each level run
+once between 07:22 and 13:20; fixes found earlier in the day were in, later ones not). Per level:
+start points (sections), checks passed and failed on the host, runtime script errors host/client,
+frames host/client. Not toured: dc_whitehouse (Whiskey Hotel) and ending (Museum).
+
+| Level | Sections | PASS | FAIL | Script errors | Frames | Notes |
+|---|---|---|---|---|---|---|
+| trainer | 7 | 91 | 0 | 0/0 | 28/28 | |
+| roadkill | 9 | 88 | 1 | 0/0 | 30/30 | walk check at `dismount`: 26 of 100 units (the level's slow walk) |
+| cliffhanger | 15 | 162 | 21 | 4/4 | 56/56 | the walk check stepped off the cave ledge and player 2 fell forever: fixed (ledge death per player, walk only where there is floor); first two sections rerun after the fix PASS; errors from the dev-only `jump` start |
+| airport | 9 | 109 | 0 | 6/6 | 34/34 | errors in `grigs_test` / `_anim::get_anim_position` (not looked into) |
+| favela | 12 | 123 | 0 | 0/0 | 37/37 | |
+| invasion | 17 | 201 | 0 | 0/0 | 62/62 | run after the Burger Town spot fix |
+| favela_escape | 13 | 169 | 0 | 0/0 | 52/52 | |
+| arcadia | 5 | 65 | 0 | 0/0 | 20/20 | |
+| oilrig | 9 | 93 | 0 | 0/0 | 30/30 | surfacing start fixed afterwards |
+| gulag | 13 | 139 | 4 | 1/1 | 46/46 | player 1 sent to triggers inside walls (test artifact); error: scripted kill in `player_dies_to_cavein` under god mode |
+| dcburning | 10 | 116 | 0 | 0/0 | 36/36 | Blackhawk ride fixed afterwards |
+| contingency | 8 | 104 | 0 | 0/0 | 32/32 | |
+| dcemp | 12 | 126 | 0 | 7/7 | 40/40 | errors in the level's `emp_empaftermath` / ambient start code; partner rigs fixed afterwards |
+| estate | 10 | 121 | 1 | 4/4 | 38/38 | walk check at `forest_fight` (the start's shellshock); errors in the level's start code |
+| boneyard | 7 | 83 | 2 | 5/5 | 26/26 | `ride_end`: player 2 left behind, fixed (UAZ back seat); errors in the level's vehicle start code |
+| af_caves | 10 | 108 | 1 | 0/0 | 33/33 | walk check at the default start: 25 of 99 units (not looked into) |
+| af_chase | 13 | 39 | 0 | 0/0 | 14/14 | knife dev starts skipped |
+
 ## Status
 
 Next: lip sync (off on both screens), the nrend anim_loop error, profile records, checkpoints in

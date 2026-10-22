@@ -5,19 +5,21 @@
 | Engine | IW 4.0 (closed; id Tech 3 derived) |
 | Versions tested | Steam app 10180, build 25374375 (the 64-bit update of September 2026): `iw4sp.exe` x64, PE timestamp `0x6aaaa257`, SHA-256 `2F8C9CFDA1B8C0FB308FD9719577154E8222FC7654F5E8F1BF54579BCA69D805`, `version` dvar `IW4 2.0 build 14 Fri Oct 03 16:56:21 2025 win64`, Russian language set |
 | Projects | [mw2_coop](https://github.com/stxlvn/mw2_coop) (campaign co-op, beta, playable, MIT); COD-MOD 3.223 campaign co-op pack (32-bit, 2020, abandoned) |
-| QA level | automated (two game copies on one PC, in-game scripted checks of the reworked set pieces and a spawn and kit check per level; the campaign has not been played through end to end) |
+| QA level | automated (two game copies on one PC, in-game scripted checks of the reworked set pieces, a spawn and kit check on six levels, a bot tour of the start points of 17 of the 19 levels; the campaign has not been played through end to end) |
 | Last updated | 2026-10-22 |
 
 ## Where things stand
 
 **Beta, playable (v0.4.0-beta).** On the current 64-bit Steam build, two players play the
 campaign together through the game's own Spec Ops co-op netcode, hosted and joined from the
-game's menus (lobby, list of games on the network, address, Steam invite). Reworked for two
+game's menus (lobby, list of games on the network, address; Steam invite between two accounts
+untested). Reworked for two
 players: S.S.D.D. (each takes his own weapons), Team Player's convoy, the Humvees of
 Wolverines!, Takedown's car, The Only Easy Day's swim and stealth kill, Cliffhanger's ice climb
 and snowmobiles, No Russian's elevator, cover and ending, the crash site and ISS of Second Sun,
 Endgame's boat chase and the final knife fight. Enemies fight both players; both play the
-difficulty the host picks. Every mission's start points were toured by bots on two copies, and every
+difficulty the host picks. Bots toured the start points of 17 of the 19 levels on two copies (results in
+[NOTES.md](NOTES.md); Whiskey Hotel and Museum not toured), and every
 set piece of the campaign is reworked for two; nobody has played the whole campaign through
 together yet.
 The older COD-MOD campaign co-op pack only runs on the 32-bit build that the 2026 update
@@ -212,7 +214,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.0-bet
     follows his view, Price keeps his side through the level's 4 position triggers, 30 s ride).
   - `spawn` with weapon and threat checks on S.S.D.D., Team Player, Cliffhanger, No Russian,
     Takedown, Wolverines!: 9/9 PASS each; Just Like Old Times loads and spawns (PASS). The other
-    levels were not rerun on this build.
+    levels were not rerun on this build (the 2026-10-22 tour below covers their start points).
   - `look` on Loose Ends: both bodies in the forest uniform on both screens (screenshots).
 - Bots press real buttons (since v0.3.1-alpha): a scenario asks for a press with
   `press( player, "activate", ms )` and that player's own machine runs the key binding
@@ -238,8 +240,22 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.0-bet
     mission's end (113 s), both players at Roach's place and held all through, nobody down,
     Shepherd's shot hits both (health down to 2): all PASS; screenshots of player 2 in the drag,
     at the LZ and at the body toss.
-  - Older scenarios still drive players through script (positions, angles, notifies); real input
-    on those set pieces is checked by hand.
+  - Real key input (through the key bindings) runs in `buttons`, `pickups`, `introfreeze`, `bay`,
+    `look` and the tour's walk check. The older set-piece scenarios (`ride`, `takedown`, `oilrig`,
+    `dcemp`, `boat`, `climb` and others) still move players by script (positions, angles,
+    notifies, velocity pushes); nobody has checked those set pieces with real input.
+- 2026-10-22, level tour (QA `tour`, god mode on): every start point of a level in turn, both
+  players up, together, not stuck, a real-input walk, player 1 sent to the two nearest triggers,
+  frames from both screens. 17 of 19 levels, 179 sections; per-level results and what each FAIL
+  was in [NOTES.md](NOTES.md). Run on the mod's main of that day, before v0.4.0-beta, not rerun
+  on the release DLL.
+- 2026-10-22, v0.4.0-beta (god mode off where it matters): `god` (default on in QA, off without
+  the dvar: both downed at 2 health), `downs` (Recruit: before the fix 4 FAIL and the script
+  error on both machines, after all PASS), `sceneskill` (threatbias 777 and attackeraccuracy
+  0.123 kept through a down and a revive: before 4 FAIL, after all PASS), `skill` (host picks
+  through `profile_difficultySave`, client profile on Regular: picks 3, 0 and 2 give the level
+  and both players 3, 0 and 2 on both machines). The release DLL from the archive: `skill` with
+  3 and `god` with god mode off, 0 script errors.
 - 2026-10-19: `intro` ended the session at the rifle hand-out ("no viewmodel set for player
   0"); fixed by setting player 2's first-person hands.
 - Earlier run (no QA script): both copies in S.S.D.D. in co-op for about 110 s, the client
