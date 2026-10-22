@@ -954,6 +954,34 @@ walks into the final trigger dies (player 1 outside co-op). QA `lineoffire` (sta
 Frames: the `intro` start is the elevator with the mission's intro screen, black for its first
 10 s, as in single player.
 
+## God mode, downs and difficulty for two (2026-10-22, v0.4.0-beta)
+
+- Test god mode: `god_mode_on()` was `GetDvar("mw2coop_god") != "0"`, and only the removed
+  `.bat` launchers set "0": every lobby session of v0.3.0-alpha and v0.3.1-alpha ran with both
+  players invulnerable. Now on only for "1" (`tools/qa_pair.sh` sets it). QA `god` both ways.
+- Recruit: `maps\_gameskill` has `player_downed_buffer_time` for normal, hardened and veteran
+  only. On Recruit (`easy`) `maps\_coop::downed_player_manager()` multiplied undefined on the
+  first down (script error) and its thread ended: nobody went down after it and both down never
+  failed the mission. Patched to Regular's 2 s. QA `downs` (forces Recruit with
+  `level.forcedgameskill`): before 4 FAIL plus the error on both machines, after all PASS.
+- `resetSkill()` runs on every down and revive (Spec Ops' buff for the player still up) and set
+  both players' `threatbias` and `attackeraccuracy` back to the difficulty's values, undoing a
+  scene's own. Both kept around the call. QA `sceneskill`: before 150 and 1 instead of 777 and
+  0.123, after all PASS.
+- Difficulty: the popup's buttons run `profile_difficultySave <n>` and `setdvar` on
+  `g_gameskill` and `g_gameskill_player_1/2`. All three are latched (flag 2; `g_gameskill` has
+  0x2000 too, and console `set`, `setdvar`, `seta` change nothing): `devmap` applies the latch,
+  a co-op session starts with `coopLaunch`, so the pick never applied. The level start (rva
+  `0x22e1a0`) sets `g_gameskill_player_<n>` from party member n's difficulty (rva `0x5dd988` +
+  n * 0x38, each member's own profile), `GetPlayerSetting("gameskill")` reads that dvar (rva
+  `0x18de0a`), and `updateGameSkill()` plays the higher of the two players'. So the host played
+  what his profile loaded at startup and the client his own. Fix: the DLL hooks
+  `profile_difficultySave` for the host's pick (else the difficulty it plays), sends it as
+  `mw2coop_skill` with `coopLaunch`, and `updateGameSkill()` takes each player's from it in a
+  co-op campaign. QA `skill` (host picks through `profile_difficultySave`, client profile on
+  Regular): picks 3, 0 and 2 give the level and both players 3, 0 and 2 on both machines; the
+  release DLL checked with 3.
+
 ## Status
 
 Next: lip sync (off on both screens), the nrend anim_loop error, profile records, checkpoints in

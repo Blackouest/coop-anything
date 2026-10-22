@@ -4,20 +4,22 @@
 |---|---|
 | Engine | IW 4.0 (closed; id Tech 3 derived) |
 | Versions tested | Steam app 10180, build 25374375 (the 64-bit update of September 2026): `iw4sp.exe` x64, PE timestamp `0x6aaaa257`, SHA-256 `2F8C9CFDA1B8C0FB308FD9719577154E8222FC7654F5E8F1BF54579BCA69D805`, `version` dvar `IW4 2.0 build 14 Fri Oct 03 16:56:21 2025 win64`, Russian language set |
-| Projects | [mw2_coop](https://github.com/stxlvn/mw2_coop) (campaign co-op, prototype, MIT); COD-MOD 3.223 campaign co-op pack (32-bit, 2020, abandoned) |
+| Projects | [mw2_coop](https://github.com/stxlvn/mw2_coop) (campaign co-op, beta, playable, MIT); COD-MOD 3.223 campaign co-op pack (32-bit, 2020, abandoned) |
 | QA level | automated (two game copies on one PC, in-game scripted checks of the reworked set pieces and a spawn and kit check per level; the campaign has not been played through end to end) |
 | Last updated | 2026-10-22 |
 
 ## Where things stand
 
-**Work in progress (prototype).** On the current 64-bit Steam build, two players play the
+**Beta, playable (v0.4.0-beta).** On the current 64-bit Steam build, two players play the
 campaign together through the game's own Spec Ops co-op netcode, hosted and joined from the
 game's menus (lobby, list of games on the network, address, Steam invite). Reworked for two
 players: S.S.D.D. (each takes his own weapons), Team Player's convoy, the Humvees of
 Wolverines!, Takedown's car, The Only Easy Day's swim and stealth kill, Cliffhanger's ice climb
 and snowmobiles, No Russian's elevator, cover and ending, the crash site and ISS of Second Sun,
-Endgame's boat chase and the final knife fight. Enemies fight both players. Other set pieces are
-still written for one player, and nobody has played the whole campaign through together yet.
+Endgame's boat chase and the final knife fight. Enemies fight both players; both play the
+difficulty the host picks. Every mission's start points were toured by bots on two copies. Other
+set pieces are still written for one player, and nobody has played the whole campaign through
+together yet.
 The older COD-MOD campaign co-op pack only runs on the 32-bit build that the 2026 update
 replaced, and players who tried it found it rough.
 
@@ -42,7 +44,7 @@ replaced, and players who tried it found it rough.
   ([install guide](https://forum.alterware.dev/t/iw4x-singleplayer-install-guide/383)).
 - **IW4x** ([iw4x/iw4x-client](https://github.com/iw4x/iw4x-client)): open-source multiplayer
   client, not the campaign.
-- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.3.1-alpha):
+- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.4.0-beta):
   this project, for the 64-bit build.
 
 ## How the game works (for co-op)
@@ -107,7 +109,7 @@ replaced, and players who tried it found it rough.
 
 ## What we changed
 
-All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.3.1-alpha of 2026-10-22; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
+All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.0-beta of 2026-10-22; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
 - `winmm.dll` proxy that checks the build, runs console commands from a file, watches dvars
   and memory, logs co-op packets and script runtime errors.
 - Script loader replacement (`Scr_AddSourceBuffer`): own scripts plus load-time patches of the
@@ -156,6 +158,19 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.3.1-alp
 - v0.3.1-alpha also: every mission intro (the title on black) holds both players, not just player
   1; UPnP finds the router on a PC with several network adapters (the search leaves from the
   adapter of the internet route).
+- v0.4.0-beta: the test god mode was on in every lobby session since v0.3.0-alpha (it was on
+  unless a dvar said "0", which only the removed `.bat` launchers set); now only when the host
+  sets it. Both players play the difficulty the host picks: the popup only latches
+  `g_gameskill` and `g_gameskill_player_1/2` (`devmap` applies the latch, `coopLaunch` does not),
+  and the level start set each player's from his own profile (party member data), so the DLL
+  hooks `profile_difficultySave` (each popup button runs it), sends the pick with `coopLaunch`,
+  and `_gameskill`'s `updateGameSkill()` takes it in co-op. Recruit had no time between downs:
+  the first down broke `maps\_coop`'s down handling. Downs and revives no longer reset a scene's
+  threatbias and attackeraccuracy. Mission tour fixes: No Russian crew look (crew mesh on the
+  co-op skeleton) and line of fire for both, Cliffhanger's ledge death, an outright death fails
+  the mission, partner seats and spots (Gulag, Blackhawk, UAZ, surfacing, Second Sun starts,
+  Burger Town), Exodus' laser designator to one random player, intros only on a mission's first
+  start.
 - S.S.D.D.: both start inside the range's sandbag bay, where COD-MOD puts its two players (v0.3.0-alpha put
   player 1 inside the bay's back wall, where he could not walk); each takes his own rifle and pistol off the
   table (another lies there until both have one; holders near it keep full ammo so they cannot
@@ -233,8 +248,8 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.3.1-alp
 
 ## How to play
 
-Alpha: see the mw2_coop README. Both players copy `winmm.dll` and the `mw2coop` folder from the
-[v0.3.1-alpha release](https://github.com/stxlvn/mw2_coop/releases) archive into the game folder; the host picks Campaign -> co-op, the partner joins from
+Beta: see the mw2_coop README. Both players copy `winmm.dll` and the `mw2coop` folder from the
+[v0.4.0-beta release](https://github.com/stxlvn/mw2_coop/releases) archive into the game folder; the host picks Campaign -> co-op, the partner joins from
 the list, by address or by Steam invite.
 
 ## Known issues
@@ -242,16 +257,16 @@ the list, by address or by Steam invite.
 - Set pieces not reworked yet are scripted for player 1 (scenes, some triggers); player 2 is kept
   next to him, but some scenes show only to player 1.
 - Global screen effects (slow motion, field of view, vision sets) show on both screens.
-- A slow scripted move of player 1 can leave player 2 behind; on Wolverines! start point `yards`
-  the players ended 2255 units apart (not looked into yet).
 - Campaign records (missions unlocked in the menu) are not updated in co-op.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
 - Joining through a Steam invite with two accounts is untested.
+- Checkpoints exist only in S.S.D.D.: a death late in another level restarts the whole mission.
+- Saved progress does not record who the partner was; "continue" resumes with anyone.
 
 ## Next steps
 
-- Rerun the spawn and kit check on the levels not covered by this build.
-- Survey every remaining set piece for two players (gulag, contingency, the rest of estate,
-  boneyard, af_caves, the Washington levels).
+- Checkpoints in every level.
+- Saved progress per partner (an id per player), with a warning when continuing with another.
+- Rework the remaining one-player set pieces found by the tour; play the campaign through.
 - Enemy scaling for two players; later, support the 32-bit build.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.
