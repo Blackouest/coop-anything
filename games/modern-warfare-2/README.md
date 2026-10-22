@@ -42,7 +42,7 @@ replaced, and players who tried it found it rough.
   ([install guide](https://forum.alterware.dev/t/iw4x-singleplayer-install-guide/383)).
 - **IW4x** ([iw4x/iw4x-client](https://github.com/iw4x/iw4x-client)): open-source multiplayer
   client, not the campaign.
-- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.3.0-alpha):
+- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.3.1-alpha):
   this project, for the 64-bit build.
 
 ## How the game works (for co-op)
@@ -107,7 +107,7 @@ replaced, and players who tried it found it rough.
 
 ## What we changed
 
-All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2026-10-21: an install archive with `winmm.dll` and the `mw2coop` folder; hosting and joining are in the game's menus, the `.bat` launchers of v0.2.0-alpha are gone):
+All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.3.1-alpha of 2026-10-22; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
 - `winmm.dll` proxy that checks the build, runs console commands from a file, watches dvars
   and memory, logs co-op packets and script runtime errors.
 - Script loader replacement (`Scr_AddSourceBuffer`): own scripts plus load-time patches of the
@@ -148,12 +148,16 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
   falling helicopters, Endgame's knife fight (whoever strikes first plays it, the other is
   stunned and watches), Endgame's boat (first aboard drives, the other lies at the bow across from
   Price on a body with Price's boat animations and shoots where he looks; Price keeps his side).
-- Loose Ends, Shepherd's betrayal (after v0.3.0-alpha, not released yet): both players go through
+- Loose Ends, Shepherd's betrayal (v0.3.1-alpha): both players go through
   the ending as Roach, held on his view with no bodies or names of their own (Ghost's drag while
   fighting on his back, the LZ, the body toss, the fire). Shepherd's shot hits both; player 2's
   screen then goes black until the bodies are thrown, and both go in the one throw (only Roach's
   and Ghost's bodies are seen). COD-MOD left player 2 out of this scene.
-- S.S.D.D.: both start inside the range's sandbag bay; each takes his own rifle and pistol off the
+- v0.3.1-alpha also: every mission intro (the title on black) holds both players, not just player
+  1; UPnP finds the router on a PC with several network adapters (the search leaves from the
+  adapter of the internet route).
+- S.S.D.D.: both start inside the range's sandbag bay, where COD-MOD puts its two players (v0.3.0-alpha put
+  player 1 inside the bay's back wall, where he could not walk); each takes his own rifle and pistol off the
   table (another lies there until both have one; holders near it keep full ammo so they cannot
   pick it up as ammo) and his own frags. COD-MOD let only one player take the rifle.
 - Enemies: the engine already lets AI pick either player (QA `targets` on Loose Ends: 151 and 129
@@ -195,7 +199,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
     Takedown, Wolverines!: 9/9 PASS each; Just Like Old Times loads and spawns (PASS). The other
     levels were not rerun on this build.
   - `look` on Loose Ends: both bodies in the forest uniform on both screens (screenshots).
-- Bots press real buttons (after v0.3.0-alpha): a scenario asks for a press with
+- Bots press real buttons (since v0.3.1-alpha): a scenario asks for a press with
   `press( player, "activate", ms )` and that player's own machine runs the key binding
   (`mw2coop_bind +activate`), so Use or Forward reaches the server in his input like a key press.
   `+activate` and `+forward` are no console commands in this build, which is why queuing them
@@ -230,7 +234,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (release v0.3.0-alpha of 2
 ## How to play
 
 Alpha: see the mw2_coop README. Both players copy `winmm.dll` and the `mw2coop` folder from the
-[v0.3.0-alpha release](https://github.com/stxlvn/mw2_coop/releases) archive into the game folder; the host picks Campaign -> co-op, the partner joins from
+[v0.3.1-alpha release](https://github.com/stxlvn/mw2_coop/releases) archive into the game folder; the host picks Campaign -> co-op, the partner joins from
 the list, by address or by Steam invite.
 
 ## Known issues
@@ -242,9 +246,6 @@ the list, by address or by Steam invite.
   the players ended 2255 units apart (not looked into yet).
 - Campaign records (missions unlocked in the menu) are not updated in co-op.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
-- v0.3.0-alpha: in S.S.D.D. player 1 starts the firing range inside the sandbag bay's back wall
-  and cannot walk out of it, and the level intro (mission title on black) holds player 1 only
-  (both fixed after the release, not released yet).
 
 ## Next steps
 
