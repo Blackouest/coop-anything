@@ -853,7 +853,7 @@ both machines with real presses. Found with real input:
 - S.S.D.D.: player 1's range place (48 units left of `player_start_range`) was 10 units further
   back than player 2's and inside the bay's back wall: traces from him were blocked to the
   sides and back, Forward moved him 0 units in five tries. Now both stand where COD-MOD puts
-  its players (owner: "in COD-MOD both stand right"): player 1 at -2515.2 5190.2 (67 units left
+  its players: player 1 at -2515.2 5190.2 (67 units left
   of the start, 36 forward: bags 20 ahead, wall 23 behind), player 2 on the start (bags 42
   ahead). The bay (player traces): from 101 units left to 28 right of the start; the back wall
   slants, 7 to 25 units behind the start's line. QA `bay` checks both inside, not stuck.
@@ -874,7 +874,7 @@ flag `play_ending_sequence`); Ghost drags him on rig `playerview` (anim `estate_
 `level.player`. Before: player 2 stayed where he was (12,000 units away at start `ending`) and
 saw nothing. COD-MOD: only freeze and death shield for both at the knockout; its attempts to link
 both players to the rig are commented out.
-Owner's design (2026-10-22): as in COD-MOD as he remembers it, player 2 invisible in the
+Design: as in COD-MOD, player 2 invisible in the
 cutscenes and thrown with Roach in the one throw; Shepherd's shot hits player 2 as well (he
 sees from Roach's eyes, the gun points at him), then a black screen without text.
 Done (tools/gen_estate_patches.py, `maps\_mw2coop_estate`): every `level.player` statement of
@@ -890,7 +890,7 @@ the lowest health instead.
 
 ## UPnP on a PC with several network adapters (2026-10-22)
 
-The owner turned UPnP on in the router, and the mod still logged "no router answered". A plain
+On a PC with several network adapters the search got no answer ("no router answered"). A plain
 SSDP M-SEARCH (Python, no interface chosen) got no answer either, even for `ssdp:all`; the same
 search sent from the LAN address (bound to it, `IP_MULTICAST_IF`) or straight to the gateway got
 the router's answer at once. Windows sent the multicast out of another adapter. Fix in
@@ -902,4 +902,5 @@ added again; removal now waits for a 10 s stop.
 
 ## Status
 
-Next: lip sync (off on both screens), Endgame boat, the nrend anim_loop error; profile records.
+Next: lip sync (off on both screens), the nrend anim_loop error, profile records, checkpoints in
+every level (a death late in a level restarts the whole mission).

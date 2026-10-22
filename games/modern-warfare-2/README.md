@@ -6,11 +6,11 @@
 | Versions tested | Steam app 10180, build 25374375 (the 64-bit update of September 2026): `iw4sp.exe` x64, PE timestamp `0x6aaaa257`, SHA-256 `2F8C9CFDA1B8C0FB308FD9719577154E8222FC7654F5E8F1BF54579BCA69D805`, `version` dvar `IW4 2.0 build 14 Fri Oct 03 16:56:21 2025 win64`, Russian language set |
 | Projects | [mw2_coop](https://github.com/stxlvn/mw2_coop) (campaign co-op, prototype, MIT); COD-MOD 3.223 campaign co-op pack (32-bit, 2020, abandoned) |
 | QA level | automated (two game copies on one PC, in-game scripted checks of the reworked set pieces and a spawn and kit check per level; the campaign has not been played through end to end) |
-| Last updated | 2026-10-21 |
+| Last updated | 2026-10-22 |
 
 ## Where things stand
 
-**Work in progress (alpha).** On the current 64-bit Steam build, two players play the
+**Work in progress (prototype).** On the current 64-bit Steam build, two players play the
 campaign together through the game's own Spec Ops co-op netcode, hosted and joined from the
 game's menus (lobby, list of games on the network, address, Steam invite). Reworked for two
 players: S.S.D.D. (each takes his own weapons), Team Player's convoy, the Humvees of
@@ -246,11 +246,12 @@ the list, by address or by Steam invite.
   the players ended 2255 units apart (not looked into yet).
 - Campaign records (missions unlocked in the menu) are not updated in co-op.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
+- Joining through a Steam invite with two accounts is untested.
 
 ## Next steps
 
 - Rerun the spawn and kit check on the levels not covered by this build.
 - Survey every remaining set piece for two players (gulag, contingency, the rest of estate,
   boneyard, af_caves, the Washington levels).
-- Enemy scaling for two players (owner's plan); later, support the 32-bit build.
+- Enemy scaling for two players; later, support the 32-bit build.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.
