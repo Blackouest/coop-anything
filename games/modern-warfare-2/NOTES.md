@@ -888,6 +888,18 @@ QA `betrayal`: with test god mode on, the hit does nothing (health stays 100, fo
 run it with `MW2COOP_GOD=0`. The ending's death shield sends no `damage` notify; the test reads
 the lowest health instead.
 
+## UPnP on a PC with several network adapters (2026-10-22)
+
+The owner turned UPnP on in the router, and the mod still logged "no router answered". A plain
+SSDP M-SEARCH (Python, no interface chosen) got no answer either, even for `ssdp:all`; the same
+search sent from the LAN address (bound to it, `IP_MULTICAST_IF`) or straight to the gateway got
+the router's answer at once. Windows sent the multicast out of another adapter. Fix in
+`src/upnp.c`: the address of the route to the internet (UDP `connect` to a public address,
+`getsockname`; it sends nothing) and the gateway of that route (`GetBestRoute`); the search goes
+out from that address and to the gateway as well. The router then answered and took the forward
+(UDP 28960). Also, starting a level dropped "hosting" for a moment and the forward was removed and
+added again; removal now waits for a 10 s stop.
+
 ## Status
 
 Next: lip sync (off on both screens), Endgame boat, the nrend anim_loop error; profile records.
