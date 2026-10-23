@@ -140,7 +140,7 @@ design; `docs/TESTING.md` the test plan.
 
 Not a finished game yet, but two players can join and move in one world today:
 
-1. Both players: extract the `dao-coop-0.7.0.zip` release over their game
+1. Both players: run the release's `install.ps1` (it extracts the release and writes `daocoop.ini` for that PC's role: `-GameDir "<game dir>" -Role host -Apply` or `-Role guest -PeerIp <host LAN address> -Apply`), or extract the `dao-coop-0.7.4.zip` release over their game
    folder (with the game closed). It carries the DAOLib loader, the address
    files and the plugin, so nothing else is installed.
 2. Copy `daocoop.ini.example` to
@@ -194,6 +194,7 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 3. Area transitions with object-id alignment (`OnAreasBuild`); a host/join
    flow beyond the ini file; the automated suite extended to the combat and
    transition scenarios.
+
 
 
 
