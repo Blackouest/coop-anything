@@ -31,8 +31,10 @@ guest receives it, reloads and rejoins), and an **in-game Event Log panel**:
 a plugin-owned SWF 8 screen in DAO's HUD, built from ActionScript 2 sources with
 the game's own fonts, filled from the session's event log (multiplayer, combat
 and system categories, filter tabs, creature names, folding by click). Missing:
-animation/effect/loot sync, area transitions, a host/join menu, an internet
-transport and a second physical PC. The only interface is `daocoop.ini`.
+effect/loot/death-animation sync, area transitions, a host/join menu, an
+internet transport and a second physical PC. The copy's attack swing is mirrored
+already; the rest of the animation and effects are not. The only interface is
+`daocoop.ini` (written by the release's `install.ps1`).
 
 The log and the movement were fixed the same day (2026-10-23), and the LAN path was re-verified on 0.7.3 with `independence-test -PeerIp <this machine's LAN address>` (both peers bound `0.0.0.0`, `dropped 0`, both logs shared): the session
 **event log is now shared** (a new event packet carries each line to the other
@@ -172,8 +174,12 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 - No inventory, quest, dialogue, effect or area-transition sync yet.
 - Only GOG-build executables have been tested (inside a Steam install); the
   address library supports EA/Steam wrappers but that is untested here.
-- Tests run the debug build; the release build passed the join test but not the
-  newer scenarios.
+- Most tests ran on the debug build; `attack-test`, `reload-test`,
+  `independence-test` (loopback and LAN), `walk-test`, `ui-menu-test` and
+  `ui-shot` were also run on release builds. `combat-test` is known to fail on
+  the Fort Drakon save (an inactive `CreateObject` ogre is not returned by the
+  hostility query there); the fight path is covered by `attack-test`,
+  `walk-test` and `demo-fight`.
 
 ## Next steps
 
