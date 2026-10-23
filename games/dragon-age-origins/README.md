@@ -119,6 +119,7 @@ design; `docs/TESTING.md` the test plan.
 | M10 | **In-game Event Log panel from the plugin's own SWF** | `tools\ui-shot.ps1` and `tools\ui-join-shot.ps1`: an ActionScript 2 panel (`ui/eventlog/frame_1/DoAction.as`) is compiled into `ui/coop_eventlog.swf` (SWF 8, the game's `$TitleFont`/`$BodyFont` imported from `gfxfontlib.swf`) with FFDec, added as a HUD screen through `dao::gui::AddScreen`, and filled from `EventLog` through `Movie::SetArray`/`SetVariable` on a revision counter; screenshots show the sample lines, a real "Another player joined the game." event, combat lines with creature names, and the ALL/COMBAT/MULTI/SYSTEM filter tabs |
 | M11 | **Release package 0.7.0 with the event log screen, re-tested on the release build** | `tools\\package.ps1 -Version 0.7.0` built `dao-coop-0.7.0.zip` (7.0 MB: loader, address files, plugin, the SWF screen beside it, install notes, `daocoop.ini.example`); on that release build `tools\attack-test.ps1` (guest attack request accepted and resolved by the host) and `tools\reload-test.ps1` (host loads another save, guest reloads and rejoins) both **PASS** |
 | M12 | **Shared Event Log and independent players (0.7.1)** | Protocol 8's event packet shares each log line (both logs hold both join lines: `independence-test`); the receive loop is one `ReceiveAny` dispatch (the per-kind receives starved each other and the host stopped seeing the guest). A guest with no party index takes index 1 (`party: the guest will take party index 1 by default`), the mirror no longer repositions it before the switch (`applied` 0 after), it walks 2.14 m away from the standing host and the host's copy follows at 1.12 m; `walk-test` also passes on the release build |
+| M13 | **One-command install and LAN re-verification (0.7.4)** | The release carries `install.ps1`: `-GameDir <game folder> -Role host|guest [-PeerIp <host address>] -Apply` extracts the release and writes `daocoop.ini` for that role (backing up an old one; dry run without `-Apply`); tested on a scratch folder with a dummy `daorigins.exe` (plan, apply, guest ini plus `.bak`). LAN path re-verified on 0.7.3: `independence-test -PeerIp 192.168.56.1` (both peers bound 0.0.0.0, `dropped 0`, both logs hold both join lines) |
 
 ## QA
 
@@ -130,7 +131,7 @@ design; `docs/TESTING.md` the test plan.
   `sync-test`, `join-test`, `two-avatar-test`, `combat-test`, `attack-test`,
   `death-test`, `reload-test`, `pause-test`, `ui-shot` and `ui-join-shot` are
   the suite; each asserts its own evidence in both logs.
-- **Last result 2026-10-23: PASS** for `attack-test`, `death-test`,
+- **Last result 2026-10-23: PASS** for `independence-test` (loopback and the LAN address), `walk-test`, `attack-test`, `death-test`,
   `reload-test`, `ui-shot` and `ui-join-shot`; `demo-fight` shows the shared
   fight on screen. One scenario per test, two real game clients, on one PC over
   UDP loopback or its non-loopback LAN address — hence QA level `automated`,
@@ -194,6 +195,8 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 3. Area transitions with object-id alignment (`OnAreasBuild`); a host/join
    flow beyond the ini file; the automated suite extended to the combat and
    transition scenarios.
+
+
 
 
 
