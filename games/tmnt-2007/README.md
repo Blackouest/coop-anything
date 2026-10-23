@@ -1,5 +1,8 @@
 # TMNT (2007, PC)
 
+> **Work in progress, not stable.** This is an experimental prototype under active development. It is not
+> released and not ready to play; expect missing moves, disabled features and occasional crashes.
+
 | | |
 |---|---|
 | Engine | Ubisoft Jade ("Engine v428-42" in the game's log; gameplay scripts compiled into the exe) |
@@ -68,7 +71,8 @@ Not released.
 - Player 2 lacks some moves that depend on input history (double jump, combos, dodge, run-up moves).
 - Team moves are disabled while player 2 is in the level.
 - Brothers still unlock mid-level as in the base game.
-- Level loads and checkpoint reloads with player 2 are untested.
+- Level loads and checkpoint reloads with player 2 are untested; player 2 may not survive them.
+- The game crashed once while a new mod build was hot-loaded during play; mod builds change often.
 
 ## Next steps
 
