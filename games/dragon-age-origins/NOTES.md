@@ -193,3 +193,8 @@ dragged into one position. Root causes and fixes:
   `combat-test` does not pass on the Fort Drakon save: `CreateObject`'s ogre
   is not returned by the hostility query there; the fight path is covered by
   `attack-test` and `demo-fight`.
+- **LAN path re-verified on 0.7.3** (2026-10-23, this machine's address
+  `192.168.56.1`): `independence-test -PeerIp 192.168.56.1` PASS — both peers
+  bound `0.0.0.0` and sent to the LAN address, `dropped 0` on both sides,
+  the event packet carried both join lines to both logs. Two physical PCs are
+  still untested.

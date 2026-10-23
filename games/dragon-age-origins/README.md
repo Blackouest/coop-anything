@@ -34,7 +34,7 @@ and system categories, filter tabs, creature names, folding by click). Missing:
 animation/effect/loot sync, area transitions, a host/join menu, an internet
 transport and a second physical PC. The only interface is `daocoop.ini`.
 
-The log and the movement were fixed the same day (2026-10-23): the session
+The log and the movement were fixed the same day (2026-10-23), and the LAN path was re-verified on 0.7.3 with `independence-test -PeerIp <this machine's LAN address>` (both peers bound `0.0.0.0`, `dropped 0`, both logs shared): the session
 **event log is now shared** (a new event packet carries each line to the other
 game, and a single receive loop dispatches every packet kind, which also fixed a
 transport buffer overflow), so both players read the same lines; and a guest
@@ -194,6 +194,7 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 3. Area transitions with object-id alignment (`OnAreasBuild`); a host/join
    flow beyond the ini file; the automated suite extended to the combat and
    transition scenarios.
+
 
 
 
