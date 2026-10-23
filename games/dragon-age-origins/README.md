@@ -34,6 +34,14 @@ and system categories, filter tabs, creature names, folding by click). Missing:
 animation/effect/loot sync, area transitions, a host/join menu, an internet
 transport and a second physical PC. The only interface is `daocoop.ini`.
 
+The log and the movement were fixed the same day (2026-10-23): the session
+**event log is now shared** (a new event packet carries each line to the other
+game, and a single receive loop dispatches every packet kind, which also fixed a
+transport buffer overflow), so both players read the same lines; and a guest
+that configured no party member now **takes the first companion automatically**,
+so the two players no longer control the same Warden and cannot be dragged back
+to each other's position. Automated: independence-test and walk-test pass on
+the 0.7.1 release build.
 ## Existing work
 
 - **DAOKadanMP** — `Whocares66-Dev/DAOKadanMP`: **private** repository, no
@@ -110,6 +118,7 @@ design; `docs/TESTING.md` the test plan.
 | M9 | **Guest rejoin after the host loads another save** | `tools\reload-test.ps1` **PASS**: the host loaded a second save mid-session; the host re-saved the transfer slot and served it again, the guest saw the world-reloaded flag, reset its join state, received and loaded the new slot (loading screen) and re-selected its party member — no restart |
 | M10 | **In-game Event Log panel from the plugin's own SWF** | `tools\ui-shot.ps1` and `tools\ui-join-shot.ps1`: an ActionScript 2 panel (`ui/eventlog/frame_1/DoAction.as`) is compiled into `ui/coop_eventlog.swf` (SWF 8, the game's `$TitleFont`/`$BodyFont` imported from `gfxfontlib.swf`) with FFDec, added as a HUD screen through `dao::gui::AddScreen`, and filled from `EventLog` through `Movie::SetArray`/`SetVariable` on a revision counter; screenshots show the sample lines, a real "Another player joined the game." event, combat lines with creature names, and the ALL/COMBAT/MULTI/SYSTEM filter tabs |
 | M11 | **Release package 0.7.0 with the event log screen, re-tested on the release build** | `tools\\package.ps1 -Version 0.7.0` built `dao-coop-0.7.0.zip` (7.0 MB: loader, address files, plugin, the SWF screen beside it, install notes, `daocoop.ini.example`); on that release build `tools\attack-test.ps1` (guest attack request accepted and resolved by the host) and `tools\reload-test.ps1` (host loads another save, guest reloads and rejoins) both **PASS** |
+| M12 | **Shared Event Log and independent players (0.7.1)** | Protocol 8's event packet shares each log line (both logs hold both join lines: `independence-test`); the receive loop is one `ReceiveAny` dispatch (the per-kind receives starved each other and the host stopped seeing the guest). A guest with no party index takes index 1 (`party: the guest will take party index 1 by default`), the mirror no longer repositions it before the switch (`applied` 0 after), it walks 2.14 m away from the standing host and the host's copy follows at 1.12 m; `walk-test` also passes on the release build |
 
 ## QA
 
@@ -185,6 +194,7 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 3. Area transitions with object-id alignment (`OnAreasBuild`); a host/join
    flow beyond the ini file; the automated suite extended to the combat and
    transition scenarios.
+
 
 
 

@@ -167,3 +167,29 @@ the `dao-coop` repository.
 - Also verified earlier in the same session: damage/death channel, release
   package on the LAN address, pause agreement. `docs/STATUS.md` in the project
   repository has the evidence for each round.
+## 2026-10-23 (later) — shared Event Log and independent players
+
+The owner reported the two panels showing different events and the players being
+dragged into one position. Root causes and fixes:
+
+- **Log desync.** Each game only wrote the events it generated itself (the host
+  the combat lines, the guest its join line). Protocol version 8 adds an
+  `EventPacket` (232 bytes, category + UTF-8 text): `Notify` sends every line,
+  the receiver adds it to its own `EventLog` (`event(remote): ...`).
+- **A transport bug this exposed.** The pending-packet buffer was sized to the
+  state packet (176) while the event packet is 232, and each packet kind had its
+  own `Receive` call that scanned the socket and kept one pending datagram; with
+  a fourth kind the scans starved each other (the host reported `recv 0` and
+  the guest dropped hundreds). Fixed by `sizeof(EventPacket)` and one
+  `Transport::ReceiveAny` dispatch loop in the plugin.
+- **Players bound to one position.** A guest that set no `select_party`
+  controlled the host's own Warden; the mirror then rewrote its position to the
+  host's every packet ("teleported back"). A guest now takes party index 1 by
+  default, the mirror is skipped until it has switched, and the apply counters
+  start from there.
+- Automated: `independence-test.ps1` (different ids, guest `applied` 0,
+  furthest distance 2.14 m, puppet 1.12 m, both join lines in both logs) and
+  `walk-test.ps1` PASS on the 0.7.1 release build. The artificial-ogre
+  `combat-test` does not pass on the Fort Drakon save: `CreateObject`'s ogre
+  is not returned by the hostility query there; the fight path is covered by
+  `attack-test` and `demo-fight`.
