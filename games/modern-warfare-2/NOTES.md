@@ -1012,7 +1012,32 @@ frames host/client. dc_whitehouse (Whiskey Hotel) and ending (Museum) were toure
 | dc_whitehouse | 4 | 52 | 0 | 0/0 | 16/16 | |
 | ending | 9 | 45 | 9 | 361714/2562846 | 16/16 | player 2 cannot walk (0 of 100 units) or is 1500-1800 units from player 1 at the exhibit starts: not fixed; the errors are the civilians' `_anim::anim_weight` storm, also in single player |
 
+## Playtest 2026-10-23 (two PCs, Cliffhanger and No Russian)
+
+The owner and a friend played over the internet, each on his own PC and Steam account, with a
+session recorder in the scripts (`maps\_mw2coop_rec.gsc`: positions every second, buttons,
+weapons, links, damage, downs and the allies, written to `mw2coop.log` through a `setdvar`
+the DLL catches). Both machines' logs matched line for line (no desync). Builds were sent
+during the session (v0.4.6-beta-rec1 to rec10), each fix from the last log:
+
+| Seen in the logs | Cause | Fix |
+|---|---|---|
+| player 2 lost his ice picks, then fell off the wall when player 1 reached the top | the weapon sync took the picks with player 1's and gave them back mid-climb | the picks are each climber's own (`level.mw2coop_own_weapons`) |
+| player 2 hung inside the rock after the big jump; later Soap caught a player who had already fallen | player 2's far-lane spot under the edge was in the rock; his hidden rig still hit `start_gaz` | player 2 uses player 1's spots across the gap; no catch without `player_hangs_on` |
+| a fall put player 2 off the ground in the slope, then 40 units under the floor | the lane-shifted `player_recover`, then his lane's start | both players recover at `player_recover`; moved beside the other if on top of him |
+| falls above the safe point killed | vanilla rule | in co-op any fall from the first wall goes back to the bottom; the climb uses the easy rules |
+| two MacTavishes at the top | `friendly_init_cliffhanger` spawns a Soap per catch | the second catch reuses him |
+| a restart at checkpoint `c4` put both at the cave | `start_c4()` places nobody (teleport commented out) | checkpoints keep where they were reached; restore at the start |
+| the helicopter ending never started, the mission failed later | it waited for player 2 to get off his snowmobile | the ending starts when either player is there (as in the original) |
+| No Russian never ended after a restart at `tarmac` | `escape_main()` calls `nextmission()` from the default start only | `maps\_mw2coop::ending_goes_on()` in five level endings |
+
+Cliffhanger was finished; No Russian's ending fix was not played yet. The 12 s lobby drop seen
+earlier in QA was a two-copies-on-one-PC artifact (joining `127.0.0.1` makes member addresses
+loopback, so the lobby heartbeat never reaches the socket); players on two PCs are not affected.
+
 ## Status
 
-Done in v0.4.5-beta: profile records, checkpoints in every level, friendly fire switch. Next: lip
-sync (off on both screens), the nrend anim_loop error, the Museum for player 2.
+Done in v0.4.7-beta: saves per playthrough, checkpoint spots and regrouping, level endings after a
+checkpoint, Cliffhanger for two from the playtest. Next: S.S.D.D.'s door and Team Player's seat swap
+(playtest reports), lip sync (off on both screens), the nrend anim_loop error, the Museum for
+player 2.

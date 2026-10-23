@@ -6886,13 +6886,13 @@
   open_source: 'yes'
   last_activity: 2026-10
   qa: automated
-  notes: Beta (v0.4.5-beta), playable. MIT mod for the 64-bit Steam build. A winmm.dll proxy plus load-time
+  notes: Beta (v0.4.7-beta), playable. MIT mod for the 64-bit Steam build. A winmm.dll proxy plus load-time
     GSC patches on top of the game's own lockstep Spec Ops co-op netcode, hosted and joined from the
     game's menus (lobby, LAN list, address; Steam invite between two accounts untested). Every set piece is reworked for two players, among them S.S.D.D.,
     Team Player, Wolverines!, Takedown's car, The Only Easy Day's swim, Cliffhanger's climb and
     snowmobiles, No Russian, Second Sun's crash and ISS, Loose Ends' betrayal, Endgame's boat and knife
     fight; enemies fight both players, both play the difficulty the host picks, friendly fire is a lobby switch and every level has checkpoints. The game's co-op runs in lockstep (both PCs run the same level), so the world
-    is shared. In-game QA on two copies, including a bot tour of the start points of all 19 levels (the Museum epilogue still fails for player 2). Not played through end to end yet. Write-up in
+    is shared. In-game QA on two copies, including a bot tour of the start points of all 19 levels (the Museum epilogue still fails for player 2); two people played Cliffhanger through and into No Russian on two PCs. Not played through end to end yet. Write-up in
     games/modern-warfare-2.
   sources:
   - https://github.com/stxlvn/mw2_coop

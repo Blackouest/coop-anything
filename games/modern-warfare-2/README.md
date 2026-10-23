@@ -10,7 +10,7 @@
 
 ## Where things stand
 
-**Beta, playable (v0.4.5-beta,** also on [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)**).** On the current 64-bit Steam build, two players play the
+**Beta, playable (v0.4.7-beta,** also on [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)**).** On the current 64-bit Steam build, two players play the
 campaign together through the game's own Spec Ops co-op netcode, hosted and joined from the
 game's menus (lobby, list of games on the network, address; Steam invite between two accounts
 untested). Reworked for two
@@ -20,7 +20,8 @@ and snowmobiles, No Russian's elevator, cover and ending, the crash site and ISS
 Endgame's boat chase and the final knife fight. Enemies fight both players; both play the
 difficulty the host picks, with a lobby switch for friendly fire and checkpoints in every
 level. Bots toured the start points of all 19 levels on two copies (results in
-[NOTES.md](NOTES.md); the Museum epilogue still fails for player 2, see Known issues), and every
+[NOTES.md](NOTES.md); the Museum epilogue still fails for player 2, see Known issues), two people
+played Cliffhanger through and into No Russian on two PCs over the internet, and every
 set piece of the campaign is reworked for two; nobody has played the whole campaign through
 together yet.
 The older COD-MOD campaign co-op pack only runs on the 32-bit build that the 2026 update
@@ -47,7 +48,7 @@ replaced, and players who tried it found it rough.
   ([install guide](https://forum.alterware.dev/t/iw4x-singleplayer-install-guide/383)).
 - **IW4x** ([iw4x/iw4x-client](https://github.com/iw4x/iw4x-client)): open-source multiplayer
   client, not the campaign.
-- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.4.5-beta, [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)):
+- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.4.7-beta, [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)):
   this project, for the 64-bit build.
 
 ## How the game works (for co-op)
@@ -112,7 +113,7 @@ replaced, and players who tried it found it rough.
 
 ## What we changed
 
-All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.5-beta of 2026-10-22; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
+All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.7-beta of 2026-10-23; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
 - `winmm.dll` proxy that checks the build, runs console commands from a file, watches dvars
   and memory, logs co-op packets and script runtime errors.
 - Script loader replacement (`Scr_AddSourceBuffer`): own scripts plus load-time patches of the
@@ -182,6 +183,21 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.5-bet
   to his own profile; the Predator's zoom only on the pilot's screen (a DLL thread restores
   `cg_fov` on the other machine: `setClientDvar` drops the co-op session); Team Player's seat swap
   hint; player 2's own flare in Whiskey Hotel, as COD-MOD gave him.
+- v0.4.7-beta (from a two-player playtest on two PCs, see NOTES.md "Playtest 2026-10-23"): saves
+  per playthrough (`mw2coop\progress\save_<n>.txt`, its players by an id in `mw2coop\player.ini`
+  and their Steam IDs; a save picker in the host menu; starting with someone new asks: continue,
+  add him to the playthrough, or a new game). Whoever reaches a checkpoint first, the other is
+  brought to him; a checkpoint keeps where it was reached (Cliffhanger's `start_c4()` places
+  nobody, a restart there put both back at the cave). Five level endings went on to the next
+  mission only from the default start ("DEVELOPER: END OF SCRIPTED LEVEL"), and a co-op checkpoint
+  is a start point: No Russian, The Enemy of My Enemy, Second Sun (two) and Whiskey Hotel now go
+  on. Cliffhanger: the weapon sync took and gave the climbers' ice picks (player 2 fell off the
+  wall); the climb plays the easy rules in co-op; any fall from the first wall goes back to the
+  bottom; player 2's own spots across the gap and at the bottom were inside the rock, he uses
+  player 1's now; one Soap for both catches; the helicopter ending starts when either player gets
+  there (it waited for player 2 to get off his snowmobile, which nobody does); 250 health on the
+  snowmobiles. A session recorder writes both players' positions, buttons, weapons, damage and
+  the allies to `mw2coop.log`.
 - S.S.D.D.: both start inside the range's sandbag bay, where COD-MOD puts its two players (v0.3.0-alpha put
   player 1 inside the bay's back wall, where he could not walk); each takes his own rifle and pistol off the
   table (another lies there until both have one; holders near it keep full ammo so they cannot
@@ -274,14 +290,18 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.5-bet
 ## How to play
 
 Beta: see the mw2_coop README. Both players copy `winmm.dll` and the `mw2coop` folder from the
-[v0.4.5-beta release](https://github.com/stxlvn/mw2_coop/releases) archive (or from [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)) into the game folder; the host picks Campaign -> co-op, the partner joins from
+[v0.4.7-beta release](https://github.com/stxlvn/mw2_coop/releases) archive (or from [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)) into the game folder; the host picks Campaign -> co-op, the partner joins from
 the list, by address or by Steam invite.
 
 ## Known issues
 
 - Slow motion shows on both screens, whoever triggers it (one game clock for both PCs).
-- Checkpoints: a restart from one was tested in Team Player and S.S.D.D.; in the other levels
-  bots only checked that each checkpoint's flag exists, not when a full run sets it.
+- Checkpoints: a restart from one was tested by bots in Team Player and S.S.D.D. and played in
+  Cliffhanger and No Russian; in the other levels bots only checked that each checkpoint's flag
+  exists, not when a full run sets it.
+- Reported in the playtest, not fixed yet: in S.S.D.D. the door can close with player 2 still on
+  the course; in Team Player only one of the two can swap seats.
+- The level-ending fix (endings after a checkpoint restart) has not been played yet.
 - Museum (the epilogue, map `ending`): in the bot tour player 2 cannot walk or ends up far from
   player 1 at the exhibit start points (9 FAIL); not fixed. Its civilians also flood the log
   with `_anim::anim_weight` errors and some stand in a T-pose, in single player too (checked
@@ -290,12 +310,11 @@ the list, by address or by Steam invite.
   the van's driver); the scene plays on.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
 - Joining through a Steam invite with two accounts is untested.
-- Saved progress does not record who the partner was; "continue" resumes with anyone.
 
 ## Next steps
 
 - The Museum epilogue for player 2.
-- Saved progress per partner (an id per player), with a warning when continuing with another.
+- S.S.D.D.'s door and Team Player's seat swap from the playtest.
 - Play the campaign through together end to end.
 - Enemy scaling for two players; later, support the 32-bit build.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.
