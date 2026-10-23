@@ -177,8 +177,9 @@ interface. Source and install notes: https://github.com/vmosenkov/dao-coop.
 
 ## Next steps
 
-1. Replicate the combat animations/effects (attack swings, hits, deaths) between
-   the games, so the two screens look like one fight; then loot and bodybags.
+1. Replicate the rest of the combat animations/effects (hits, deaths, spells;
+   the copy's attack swing already plays) between the games, so the two screens
+   look like one fight; then loot and bodybags.
 2. A second physical PC over the LAN (the address path is exercised on one
    machine), then the internet transport (Steam relay).
 3. Area transitions with object-id alignment (`OnAreasBuild`); a host/join
