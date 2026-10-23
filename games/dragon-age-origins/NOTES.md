@@ -167,6 +167,7 @@ the `dao-coop` repository.
 - Also verified earlier in the same session: damage/death channel, release
   package on the LAN address, pause agreement. `docs/STATUS.md` in the project
   repository has the evidence for each round.
+
 ## 2026-10-23 (later) — shared Event Log and independent players
 
 The owner reported the two panels showing different events and the players being

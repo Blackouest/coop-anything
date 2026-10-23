@@ -2052,8 +2052,8 @@
     the session event log (filters, creature names). Missing: animation, effect
     and loot sync, area transitions, a host/join menu and an internet
     transport; LAN only. Automated two-client tests (sync, join, two avatars,
-    combat, arbitration, death, rejoin, UI) and a 0.6.0 install package are in
-    the project repo.
+    combat, arbitration, death, rejoin, UI) and a 0.7.4 install package with an
+    install script are in the project repo.
   sources:
   - https://github.com/vmosenkov/dao-coop
   - https://github.com/vmosenkov/dao-coop/blob/main/docs/STATUS.md
