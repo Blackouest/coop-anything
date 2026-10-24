@@ -614,3 +614,28 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Differences from the live session still untested:** the owner's real controller was connected and visible to the host copy (`start_host.bat` does not hide real pads, and the owner's pad is XInput 0 = `Joystick 0`, player 2's device); real players walking through zone triggers; the friend's own setup.
 - **Test setup fixes:** the LOAD list wraps around (UP from slot 01 goes to slot 10); `local/runs/pair.py` now waits for each step. A teleport next to door 1 (`-2159, 108`) is a level exit.
 - **Owner file check:** the real `video_cfg.dat` was rewritten at 21:07:16 with **identical content** (SHA-256 `210880db…`, same as the backup). The game writes this file only on a normal exit. The test copies are always force-killed and their logs show only the redirected startup reads. Writer most likely the owner's own launch (to check the inventory key): **unverified**.
+
+### Runs 44 to 48 (2026-10-24): official pad layout, two emulated controllers, inventory
+- **Owner (2026-10-24):** only the keyboard was used, the controller wasn't touched. Asked to test with controller inputs using the official button layout, fix the inventory first (camera later), and emulate two controllers with player 1 switched from keyboard to a game controller in the settings.
+- **Official layout:** the web had nothing (searches for Obscure PC/Steam controls returned only unrelated pages). Derived from the game's own stock maps instead:
+  - `_common/default.ipt` (keyboard) and `_common/default_pad.ipt` (pad): big-endian, one entry every 0x20c bytes from 0xc, action id at entry-8, device name at +0, key/button at +0x104.
+  - Keyboard → pad, by action id:
+    - Move: 101 W / 102 S / 104 D / 103 A → left stick.
+    - 125 RSHIFT walk → Button 09.
+    - Team orders: 120 NUMPAD 8 → Button 11; 121 NUMPAD 2 → Button 14; 118 NUMPAD 4 → Button 12; 119 NUMPAD 6 → Button 13.
+    - 105 F → Button 04; 106 RETURN (action) → Button 01; 113 ESCAPE → Button 02; 109 LSHIFT → Button 15; 108 RCONTROL → Button 10.
+    - 114/115 UP/DOWN → ROT Y±; 117/116 RIGHT/LEFT → ROT X± (right stick).
+    - 126 R → Button 03; 107 P → Button 05; 123 SPACE → Button 16; 127 BACKSPACE → Button 02; 112 ESCAPE → Button 06.
+    - **110 Q (inventory, hold) → Button 07**; 111 E → Button 08.
+  - "Button NN" follows the order the XInput reader unpacks buttons (`FUN_005868e0`): 01 A, 02 B, 03 X, 04 Y, 05 BACK, 06 START, 07 LB, 08 RB, 09 L-stick click, 10 R-stick click, 11 dpad up, 12 dpad left, 13 dpad right, 14 dpad down, 15 LT, 16 RT. This order is derived; it fits the dpad = NUMPAD 8/4/6/2 team orders.
+  - Verified in game: START joins, A confirms the join prompt (player 1's pad) and picks up the CD, LB opens the inventory.
+- **Tooling bug fixed:** the game rebuilds its DirectInput keyboard when entering BUTTON SETTINGS (a second keyboard device), and the DLL had only injected into the newest one. It now tracks every keyboard device, and the BUTTON SETTINGS screen responds to injected keys. The controller picker "Select a controller for player 1" lists Keyboard and Game controller 1..4. It only accepts a connected controller: with no pad connected the choice silently stays on Keyboard.
+- **Two-pad settings made through the real menu** (test copy 3, virtual pads 0 and 1 connected): Player 1 = Game controller 2, Player 2 = Game controller 1. The game asked "Save new settings?" and wrote `tm_input.ipt` (65,004 bytes; copy `local/runs/tm_input_two_pads.ipt`). After loading, host player 1's controller type was 4 (`Joystick 1`).
+  - Writing the device table directly in memory (`*(game+0xa20)+0x2c4`) does **not** change the binding; the controllers are bound from `tm_input.ipt`.
+- **Inventory with two emulated pads** (run 47):
+  - Player 1 holding LB (virtual pad 1) puts player 1's `CInventory` into mode 1, and only that one. Player 2 holding LB (the guest's pad over the network) does the same for player 2's own. So each player opens their own inventory.
+  - Character `+0x88` is the controlling `CRealPlayer`; its `+0x10` is the `CInventory` menu (mode `+0x1c`: 3 closed, 1 open). The character's `CPlayerInventory` is embedded at character `+0x128`.
+  - Scrolling (right stick while holding LB) produced no observable change: both test inventories hold almost nothing (P1 empty, then the CD; P2 the bat).
+  - **Retraction:** run 47 showed P1 inventory `+0x40` changing during P2's scroll. A write watch (new test command `watch`: a guard page plus a vectored handler, in-process, no debugger) showed every write to that field comes from the generic list iterator `FUN_0040f790/FUN_0040f7a0` (`0x40f792`/`0x40f7ab`, thousands of times). It is a list cursor, not the selection. The owner's "only controllable by the remote player" is **not reproduced yet**.
+  - `FUN_00421890` is the `CKinePlayer` (cutscene) script interpreter, not the inventory.
+- **Configuration idea for the owner's real setup:** the owner's own controller is XInput 0 = Game controller 1. If the owner plays player 1 on it, player 2 should be Game controller 2, with the host's `REMOTE_PAD=1`, so the remote player's virtual pad never shadows the owner's real one.
