@@ -534,3 +534,27 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - The guest started with no save. After the host loaded its save, the guest had a byte-identical copy (SHA-256 `2f90eee1…`, 22,528 bytes; sent twice: once at the LOAD listing, once at the load).
   - The guest's bot loaded it; player 2 joined; both copies in level 193 with characters mirrored at 0.0 error.
 - **Still to do for joining:** load the received save on the guest without a human pressing LOAD, and join while the host is already further than its last save (live sync then corrects level, flags and items, but not inventories).
+
+### Runs 32 to 37 (2026-10-24): Steam transport (in the game's own steam_api.dll), test package
+- **Owner (2026-10-24):** the friend owns Obscure on Steam; build the Steam transport.
+- **Interfaces** (the game's 2014 `steam_api.dll`, no flat API), called through vtables from C:
+  - `SteamUser017` slot 2 `GetSteamID` (CSteamID returned through a hidden pointer, MSVC member-function rule).
+  - `SteamFriends013` slot 0 `GetPersonaName`, 3 `GetFriendCount`, 4 `GetFriendByIndex` (hidden pointer), 5 `GetFriendRelationship`, 8 `GetFriendGamePlayed` (FriendGameInfo_t: u64 game id, u32 ip, u16 ports, u64 lobby).
+  - `SteamNetworking005` slot 0 `SendP2PPacket`, 1 `IsP2PPacketAvailable`, 2 `ReadP2PPacket`, 3 `AcceptP2PSessionWithUser`, 7 `AllowP2PPacketRelay`.
+  - Callbacks: `SteamAPI_RegisterCallback` with a hand-built `CCallbackBase` `{vtable, u8 flags, int id}`, vtable `{Run(param, bool, SteamAPICall_t), Run(param), GetCallbackSizeBytes}` (MSVC reverses the two `Run` overloads). P2PSessionRequest_t = 1202.
+  - Slot numbers come from the SDK headers of that interface version (derived). Which are confirmed is listed below.
+- **DLL stage 4** (`steam.c`, `net.c` rewritten around a peer key, Steam id or UDP ip:port):
+  - All Steam calls run on the main thread from the frame hook (`net_frame`); UDP keeps its thread.
+  - The host accepts P2P sessions from Steam friends only, one guest.
+  - The guest says hello to `HOST_STEAMID` if set, else to every friend whose game is app 254460, and keeps the one that answers WELCOME.
+  - All packets are `k_EP2PSendUnreliable` (the protocol handles loss; every packet is under 1200 bytes).
+  - The Steam timeout is 10 s.
+  - Settings can come from `obscoop.ini` next to the exe (`[obscoop]`, keys without `OBSCOOP_`); environment variables win.
+- **Observed on the owner's PC (one Steam account):**
+  - Run 32: the UDP regression after the rewrite passes, `mirror_test.py` 8/8.
+  - Run 33: on Steam, host and guest both initialised ("own id valid", persona name readable, a friend count of 55, callback registered without error). The guest was told to call its own account (`HOST_STEAMID=self`, test only). Its HELLO went through `SendP2PPacket` and was read by `ReadP2PPacket` with the right sender id: the host accepted it, 0 bad packets. With one account, whichever process polls first reads all packets (host rx 2171, guest rx 0). So **send/read and sender decoding are confirmed; two-way traffic needs two accounts.**
+  - Runs 34 and 35: friends scan in scan-only mode (`OBSCOOP_SCAN_ONLY=1`, contacts nobody): "4 of 55 friends in a game, 0 in Obscure". `GetFriendByIndex`/`GetFriendGamePlayed` return plausible, selective results.
+  - Run 36: a guest configured only by `obscoop.ini` linked to a UDP host.
+  - Run 37: `start_host.bat` (sets `SteamAppId`, `OBSCOOP_ROLE=host`, `OBSCOOP_NET=steam`) starts the test copy as a Steam host ("steam: ready"). Owner files unchanged.
+- **Not confirmed (needs the friend):** the session-request callback firing and `AcceptP2PSessionWithUser`; real two-way traffic, latency and loss over Steam's relay; the guest's real controller via `LOCAL_PAD`.
+- **Test package** (`local/package/obscoop-test-0.1.zip`, SHA-256 `a54969e5…`; DLL `2619afbb…`): `xinput1_3.dll`, `obscoop-guest.ini`, `obscoop-host.ini`, `README.txt`. In guest mode the friend's own game sees no pads, so they use the keyboard for menus. While the DLL is installed their own cloud saves are neither used nor touched (co-op saves go to `coop_profile`).
