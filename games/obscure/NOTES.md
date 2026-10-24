@@ -428,3 +428,24 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Character position (observed):** walking player 2 with the guest's stick changed floats at character `+0x20` (26.0 → 87.5) and `+0x24` (-290.6 → -650.6). These are probably the ground-plane X and Z (derived). Height and facing: not found yet.
 - Owner files unchanged across the run.
 - **Not done:** the Steam P2P transport; and a guest view of the host's world (the guest's own copy sat at its main menu in this test, so the guest player still can't see the game).
+
+### Runs 15 to 18 (2026-10-24): world sync stage 3, the guest mirrors both player characters
+- **DLL stage 3** (`sync.c`):
+  - Per-frame hook on `steam_api!SteamAPI_RunCallbacks`, which the main loop calls once per pass (about 14,000 calls in a 90 s test).
+  - Host, every 2nd frame: walks the human-character list (`*(game+0x510)+0x1c`, nodes `{item, next}`, read without touching the game's own cursor at `+8`). For each character it sends id `+0x78`, position `+0x20..+0x28`, facing `+0x2c..+0x34`, health `+0x54`, and which real player controls it.
+  - Guest: keeps the newest snapshot (network thread) and applies it on the main thread through the game's own setters: entity vtable slot 2 (position) and slot 3 (facing), plus the physics body `+0x68` (slot 2) and its `+0x94` update, the same calls `TM_SetPlayerPos`/`TM_SetPlayerView` make.
+  - Guest: its real player 0 switches to the character the guest plays on the host via `FUN_0044b7e0(character)` (thiscall on the real player; it sets `+0xc` and the human flag `+0x84`), retried every 60 frames.
+    - `FUN_0044b3b0` is not a switch: it only moves the `+0x84` flag and the teammate link. It returns early while story byte `0x1c` is 1..9 (derived: a scripted-scene lock).
+  - Guest: the local game sees **no** XInput pads (the guest's pad is read only to send it), so the friend's controller can't drive their own copy's menus. In run 15, START on the guest pad had opened the notebook on both copies.
+- **The join button is START.** Run 16 probe, one button at a time, measuring how much the screen centre changed: A 4.3, B 6.3, X 7.1, Y 6.6, BACK 6.9, START 69.6. "Player 2 joins the game" appeared after START. Pressing START again opens the notebook (Map / Characters / Clues).
+- **Run 15 was invalid.** Both copies sat in the notebook, so positions "matched" at 0.0 without anyone moving. The test now also checks that both players moved on the host.
+- **Run 18, `local/runs/mirror_test.py`: RESULT: PASS (7/7 checks):**
+  - Both copies loaded the owner's save with the same human characters (ids 2, 4, 5).
+  - Player 2 joined on the host (guest START, host Enter).
+  - The guest's player 1 controls the guest-played character, id 4 (switched on try 1).
+  - Host player 1 (id 2) moved 586 units with W/D/S/A; host player 2 (id 4) moved 288 units with the guest's stick.
+  - Guest-to-host position error: worst during walking 4.4 (id 2) and 3.2 (id 4) at 4 Hz sampling, final 0.0 for all three.
+  - 3617 input and 5214 state packets, 0 bad.
+  - Screenshots `local/runs/run18_host.png` and `run18_guest.png` show the same scene, with the guest's camera on its own character.
+- **Not synced yet:** animation state (the guest's puppets were only seen standing in screenshots; walk animation unknown), enemies (`CPlayerPNJ*`), the 161 story flags, doors/items/pickups, level changes, health effects, and the initial state (both copies loaded the same save by hand).
+- Owner files unchanged in every run.
