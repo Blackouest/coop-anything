@@ -601,3 +601,16 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - On the host both P1's and P2's objects had `+0x1c = 3` (the value of the `Joystick 0` device type). Whether `+0x1c` is an owner device: unknown.
   - SPACE didn't make `+0x34` non-zero, with `+0x1c` 3 or 1. The inventory key is unknown.
 - Fixed: "guest has the whole save" is now logged once per transfer.
+
+### Runs 41 to 43 (2026-10-24): inventory key, camera after a team change
+- **Owner:** the camera problem was there "from the start"; the inventory opens by **holding Q** and scrolls with the arrow keys. (One-letter key names were missing from the `tm_input.ipt` list because the search needed 2+ characters.)
+- **Inventory:** holding Q on the host turns P1's inventory object `+0x1c` from 3 to 1 for as long as Q is held, whatever the leader flag. So `+0x1c` is the inventory mode, not an owner. The item icons show at the screen corners.
+  - Arrow keys (host) and dpad-right (guest pad) didn't change anything detectable in the first 0x200 bytes of either inventory object, or in the corner icons. Where the selection lives: unknown.
+- **Leader flag on the guest:** moving `+0x84` between the guest's own character and the host's P1 character did not change the guest's camera; it stayed on the guest's own character (Ashley).
+- **Team change** (new pipe command `switch <player> <char id>`: `FUN_0044b7e0` on that real player; run 43):
+  - Host P2 switched from character 4 to 5; the guest followed ("switch to character id 5 (try 2) -> now 5", the same line as in the friend's log).
+  - The guest's camera then showed character 5 (screenshot `local/runs/sw_after.png`).
+  - **Not reproduced:** the owner's "camera stays on my player" on the guest, and "remote player controls the camera" on the host.
+- **Differences from the live session still untested:** the owner's real controller was connected and visible to the host copy (`start_host.bat` does not hide real pads, and the owner's pad is XInput 0 = `Joystick 0`, player 2's device); real players walking through zone triggers; the friend's own setup.
+- **Test setup fixes:** the LOAD list wraps around (UP from slot 01 goes to slot 10); `local/runs/pair.py` now waits for each step. A teleport next to door 1 (`-2159, 108`) is a level exit.
+- **Owner file check:** the real `video_cfg.dat` was rewritten at 21:07:16 with **identical content** (SHA-256 `210880db…`, same as the backup). The game writes this file only on a normal exit. The test copies are always force-killed and their logs show only the redirected startup reads. Writer most likely the owner's own launch (to check the inventory key): **unverified**.
