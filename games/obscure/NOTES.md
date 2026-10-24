@@ -449,3 +449,25 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Screenshots `local/runs/run18_host.png` and `run18_guest.png` show the same scene, with the guest's camera on its own character.
 - **Not synced yet:** animation state (the guest's puppets were only seen standing in screenshots; walk animation unknown), enemies (`CPlayerPNJ*`), the 161 story flags, doors/items/pickups, level changes, health effects, and the initial state (both copies loaded the same save by hand).
 - Owner files unchanged in every run.
+
+### Runs 19 to 22 (2026-10-24): animation sync for human characters
+- **Movement state** (run 19, host alone, player 1): character `+0x60` = 10 standing, 30 running (default when moving), 20 walking (RIGHT SHIFT held); `+0x230` changes with it. Also changing while moving:
+  - `+0xd8`: 0 → 1.
+  - `+0xf0`: 1 → 6, probably the locomotion animation set (derived).
+  - `+0x238/+0x23c` and `+0x244/+0x248`: the move direction (0.005, 1.0 for W).
+  - `+0x250`: 0 → 1000.0.
+  - `+0xb8`/`+0xbc`: probably speed (396).
+  - `+0x88` holds pointers (action-state objects), not flags.
+- **Setting the state directly doesn't stick** (run 20): `FUN_00436bd0(state)` (thiscall on the character, as `TM_SetPlayerState` calls it) ran 347 times on the guest. Its state stayed 10, with host/guest agreement 1/48.
+- **Where it's decided** (static):
+  - `CPlayerHuman` vtable `0x6449e4`, slot 1 = `Update(dt)` (`FUN_0043f6e0`).
+  - Update scales the move direction `+0x238..+0x240` by `+0x250`, runs `FUN_0043a650` (turning and facing), then `FUN_0043bf60`, the state machine. All the 30/20 and most of the 10 transitions are there.
+  - In state 10 it switches on **`+0x230`, the requested state** that the brain (player controller or AI) writes earlier in the frame.
+- **Stage 3b:**
+  - The host sends `+0xd8`, `+0x230` and the block `+0x238..+0x254` per character.
+  - The guest patches `CPlayerHuman::Update` (only if the slot still holds `0x43f6e0`). For each mirrored character it writes those fields before the original Update and the host position/facing after it. The game's own state machine and animation then follow the host.
+- **Run 22: RESULT: PASS (8/8 checks):**
+  - State/animation agreement (`+0x60`, `+0xf0`) for both player characters: 47/48 samples.
+  - Positions: worst during walking 4.1, final 0.0.
+  - Screenshots `local/runs/guest_running.png` and `host_running.png` taken mid-run: the guest shows both characters in a running stride.
+- Run 21, with intent but without `+0x230`: agreement still 1/48. So the requested state is the field that matters.
