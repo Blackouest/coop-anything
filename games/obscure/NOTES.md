@@ -642,3 +642,22 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Host launcher for two controllers** (owner approved 2026-10-24): `start_host.bat` now sets `OBSCOOP_REMOTE_PAD=1` (the friend's pad goes to virtual pad 1 = Game controller 2) and `OBSCOOP_VPADS=1` (that virtual pad reports connected from the start, so BUTTON SETTINGS can assign it). Real controllers stay visible, so the owner's own pad (XInput 0) is Game controller 1 for player 1. The host test copy got the current DLL (SHA-256 `b2898072…`).
   - Run 49, smoke test: "real controllers visible", "virtual pad 1 connected at start", "remote pad 1", "steam: ready", status "waiting for a guest (Steam)". Owner files unchanged.
   - One-time owner step: Options > BUTTON SETTINGS: Player 1 = Game controller 1, Player 2 = Game controller 2, then "Save new settings? YES". The guest package is unchanged (the friend's pad 0 is sent; the host maps it to virtual pad 1).
+
+### Runs 50 to 54 (2026-10-24): inventory control fixed (one items section per player)
+- **Owner report (two-controller session):** "the second players controls are overlapping with mine and we control the same inventory". Camera and the rest fine.
+- **Cause (static + live):**
+  - Each real player (`+0x10`) has a `CInventory` menu with its own owner (`+8`), index (`+0xc`) and weapon section `+0x20` (`CInventorySectionWeapon`, vtable `0x650d48`).
+  - The **items section** `+0x24` (`CInventorySectionItems`, 0x1a8 bytes, ctor `FUN_00512890`, vtable `0x650d6c`) is created only once: the `CInventory` ctor `FUN_0041f6a0` guards it with the global flag `DAT_006a6868`. Live: P1 had both sections, P2 only a weapon section.
+  - Opening items (mode 1, LB/Q) with no own section makes `FUN_0041fb60(1)` take the other player's section. Closing P2's menu (`FUN_0041faf0`) hands it back to P1. So both players drove one menu.
+- **Fix (host DLL, `OBSCOOP_SPLIT_ITEMS`, default on):**
+  - Each frame in a level, any real player whose `CInventory` has no items section (and is closed) gets one, created like the game does: game allocator `0x5e3fda`(0x1a8), ctor `FUN_00512890`. It is wired like `FUN_0041f8a0` wires P1's: `+0x10` = CInventory, `+0x14` = index, `+0x1c` = 0, then vtable slot 1 (owner real player, position). P2's position is (-390, -18, 480), the row of its weapon section.
+  - The hand-back on close is disabled by patching `jne` → `jmp` at `0x41fb1f` (bytes checked: `75 19` → `EB 19`).
+  - Run 51 (without the patch): the sections stayed separate while open, but closing moved P2's to P1. That's why the patch was added.
+- **Run 54, `local/runs/items_split_test.py`: RESULT: PASS (3/3 checks):**
+  - Both players have their own items section.
+  - The sections never moved in 7 open/close cycles (both together, P1 alone, P2 alone).
+  - Each LB opened only that player's inventory (mode checked every cycle).
+  - Run 53 printed PASS for a placeholder check that was always true; it was replaced with the real mode check before run 54.
+  - Screenshot `local/runs/both_inv_split.png`: both inventories open at once, P2's column top left, P1's bottom left.
+- **Still shared:** both columns show the same items (CD, energy drink ×2). The bag's **contents** remain the team's, as in the original; only control is per player now. Separate bags and a give-item feature would be new design: not done.
+- Host test copy got the DLL (SHA-256 `1854e7cd…`); the guest package needs no change (the fix runs on the host).
