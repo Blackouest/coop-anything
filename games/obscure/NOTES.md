@@ -661,3 +661,19 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Screenshot `local/runs/both_inv_split.png`: both inventories open at once, P2's column top left, P1's bottom left.
 - **Still shared:** both columns show the same items (CD, energy drink ×2). The bag's **contents** remain the team's, as in the original; only control is per player now. Separate bags and a give-item feature would be new design: not done.
 - Host test copy got the DLL (SHA-256 `1854e7cd…`); the guest package needs no change (the fix runs on the host).
+
+### Runs 55 and 56 (2026-10-24): attack sync
+- **Owner report:** "in attack mode the remote player does not have it synced so on his screen I am not attacking anyone".
+- **Controls observed** (pad, official layout): **LT = aim** (state 101, anim set 27); **LT + A = attack swing** (state 103, anim set 22, back to 101). LT + RB = another action (100/21); X does nothing while aiming; RT alone does nothing.
+  - A character without a weapon doesn't aim (Ashley, character 4: state 10 → 11).
+- **Cause:** the swing is requested by `+0x230 = 103` for a **single frame**, and then the state machine runs it. Snapshots go every 2nd frame, so the guest almost never saw it; aiming (a held state) already mirrored.
+- **Fix (stage 3g, host + guest DLL):**
+  - The host now also hooks `CPlayerHuman::Update` and records every change of a character's requested state before the game consumes it: a sequence number plus the last 4 values per character id, sent in each character snapshot.
+  - The guest replays missed changes in order, one per Update, before the snapshot's current value. The first snapshot only primes the sequence, with no replay of history.
+- **Run 56, `local/runs/attack_test.py`:**
+  - Player 1 (host's pad, Josh): 3 swings on the host, 3 on the guest. PASS.
+  - Player 2 failed in the script only because it played Ashley (no weapon: 0 swings on either side).
+  - After `switch` gave player 2 Josh: remote pad LT+A ×3 → host swung 3, guest showed 3. PASS.
+  - Counters: host 11 events recorded; guest 8 replayed.
+- **Not tested:** hits landing on enemies from the guest's point of view (enemy health is host-authoritative and already synced); firearms/flashlight beam effects; other one-frame actions, which would go through the same event path.
+- Package `local/package/obscoop-test-0.3.zip` for the friend (guest side needed for the replay). The host test copy has the same DLL.
