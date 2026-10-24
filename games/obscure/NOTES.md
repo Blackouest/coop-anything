@@ -583,3 +583,21 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Camera code is around `0x40b000-0x40e000`: CCameraManager vtable `0x642680`; zone owner `+0x184` on cameras; `FUN_0040d130` changes zone owners; recenter is `FUN_0040b5b0`. Which field selects the followed character: **unknown**.
 - **Next:** find the camera target field, keep the leader flag on P1's character on the host and on the guest's own character on the guest, and re-test with `mirror_test.py`. Separate inventories plus a give-item feature would be new game design, beyond mirroring.
 - Minor: "guest has the whole save" is logged on every duplicate acknowledgement (log spam).
+
+### Runs 39 and 40 (2026-10-24): camera and inventory investigation
+- **Camera wiring (static + live):**
+  - Each camera follows a real player: `camera+0x180` → real player, whose `+0xc` is the character (`FUN_00408670`).
+  - The game object holds one camera list per real-player slot: `game+0x30` and `game+0x44` (`+0x14` apart). A per-slot active camera at `game+0x60`/`+0x64` was 0 here. A per-slot view pointer sits at `game+0x1e8 + 0x238*i`.
+  - `FUN_0044c2b0` (a real-player method, called every frame for both slots) **swaps the slots** when the role-100 player's character is missing or dead (`+0x58`) and the other's is alive. Roles: real player `+4` = 100 / 200. It then retargets every camera to the new slot pointers.
+- **Leader flag** `+0x84`: after the join it is on player 2's character on the host (both in tests and in the owner's session). On the guest it sits on the host-P1 character.
+  - Moving it on the host (WriteProcessMemory, test copy) did **not** change which character the host camera follows.
+- **Run 40, host camera checks:** the camera follows player 1 in every case:
+  - P2 teleported to another zone (`tp 1 …`, new pipe command);
+  - P1 teleported to another zone;
+  - P2 walking about 1000 units with the guest's stick, an off-screen marker showing P2.
+  - The guest's camera followed the guest's own character (Ashley) in her zone.
+  - So the owner's camera reports are **not reproduced**. What triggered them in the live session: unknown.
+- **Inventory:** each character has its own inventory menu object (`character+0x88 → +0x10`). `TM_IsInventoryMenuVisible` returns `+0x34` when `+0x1c` equals its argument.
+  - On the host both P1's and P2's objects had `+0x1c = 3` (the value of the `Joystick 0` device type). Whether `+0x1c` is an owner device: unknown.
+  - SPACE didn't make `+0x34` non-zero, with `+0x1c` 3 or 1. The inventory key is unknown.
+- Fixed: "guest has the whole save" is now logged once per transfer.
