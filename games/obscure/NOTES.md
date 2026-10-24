@@ -471,3 +471,32 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Positions: worst during walking 4.1, final 0.0.
   - Screenshots `local/runs/guest_running.png` and `host_running.png` taken mid-run: the guest shows both characters in a running stride.
 - Run 21, with intent but without `+0x230`: agreement still 1/48. So the requested state is the field that matters.
+
+### Runs 23 to 25 (2026-10-24): levels, story flags, enemies
+- **Level ids:** the current level is the byte at `*(game+0x510)+8`. The owner's courtyard save is 193 = `M000`.
+  - The id → name table has 111 entries (`FUN_0042c150`: ids at `0x695df8`, name pointers at `0x695e68`). Ids 225..234 are developer test levels (`WLOCK`, `WTEST`, `WCHAIR`, `WHIKARU`, `WDOORS`, `WMORD`, `WCRAB`, `WGRIM`, `WREIN`, `WHOMM`). They are **not** in the shipped archives (no `_levels/w*`). Requesting `WMORD` sent both copies back to mode 1, the loader's failure path in `FUN_00416a70`.
+- **Level change** (`FUN_00416a70`): runs when `game+8 == 5` and `game+4 == 2` (in play). It loads `game+0x590` (name) with entry `game+0x5d0`, and keeps the previous level id in `game+0xad0`.
+- **Stage 3c (DLL):**
+  - **Host:** notices `game+8 == 5` each frame and sends the name and entry (repeated for 2 s). Every state packet carries the level id. The 161 story flags go out every 15 frames.
+  - **Guest:** applies the host's request on its main thread (same three writes as `TM_LoadLevel`). It copies the host's flags when in the same level, and mirrors nothing while the levels differ or a change is pending.
+  - **Guest:** its `TM_LoadLevel` and `TM_EventChangeLevel` bodies (vtable slot 3 at `0x649660`/`0x64a960`, checked against `0x4ddb80`/`0x4d92a0` first) are replaced by a no-op that succeeds. Only the host changes level.
+  - **Test command:** `level <id> <entry>` on the pipe requests a level change the same way.
+- **Run 24, `local/runs/level_test.py` 194 (`M001`): RESULT: PASS (7/7 checks).** Both copies were in 193 with identical flags. After the host's request both were in 194 within 5 s; the guest's log shows it followed the host (seq 1). Humans were mirrored in the new level with error 0.0, and the flags stayed identical (574 flag packets applied).
+- **Enemies:**
+  - The level manager's list `+0x58` holds them. In `C006` (id 52): six `CPlayerPNJMord`, each with `+0x78 = 1` (a type id, not unique), in the same order and at the same positions on both copies after loading.
+  - `CPlayerPNJMord` vtable `0x64cafc`: slot 1 Update `0x4d0be0` (it calls the base `CPlayerPNJ::Update` `0x4b7c30`). Slots 2/3 are the same SetPosition/SetDirection as `CPlayerHuman` (`0x430780`/`0x430820`).
+  - Base PNJ Update: the entity's position and facing come from the physics body (`+0x68` body `+0x2c`/`+0x38`) every frame. While alive (`+0x58 == 0 && +0x5c == 0`) it runs slots 19, 20 and 22, dead slot 21, and always slot 18.
+- **Health and death** (natives):
+  - `TM_SetLife` uses vtable slot 6, `AddLife(delta)`.
+  - `TM_KillPlayer` sets `+0x54 = 0`, `+0x58 = 1`, `+0x5c = 1`.
+  - `TM_IsDead` tests `+0x58 || +0x5c`.
+- **Stage 3d (DLL):**
+  - The host sends enemies in list order with their vtable (for validation), position, facing, health and dead flags.
+  - The guest's own enemy AI keeps running, but every frame each enemy gets the host's position and facing (entity and body) and the host's health through `AddLife`. A death the guest didn't reach is completed with the `TM_KillPlayer` flags.
+  - Human health is also the host's, through `AddLife`.
+- **Run 25, `local/runs/enemy_test.py` (`C006`): RESULT: PASS (6/6 checks).**
+  - Host player 1 steered into the Mordeurs. W/D world directions were probed first: W = (44, -32), D = (-70, 0) per 0.5 s.
+  - All six enemies moved 168..311 units on the host. On the guest, final position error 0.0..1.1, worst sample during the fight 85.9.
+  - Enemy health matched in 60/60 samples. Player health fell (P1 49.7 → 14.7, P2 100 → 78.9) and the guest showed the host's values (220 AddLife corrections, 0 list mismatches).
+  - Both screens showed the game's low-health red tint.
+- **Not tested:** an enemy death (the players didn't fight back in this test); enemy animation on the guest (comes from the guest's own AI; its `+0x60` stayed 0 on both copies, so the enemy state field is elsewhere); doors, items, pickups and inventory; cutscenes; giving a joining guest the host's save.
