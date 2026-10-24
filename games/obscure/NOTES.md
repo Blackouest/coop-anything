@@ -395,3 +395,16 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - The owner has an XInput controller connected. XInput is read whatever window has focus, so the DLL now has `OBSCOOP_HIDE_REAL_PADS=1` (on in all test runs): real pads report "not connected" and rumble goes nowhere, so the owner's controller can't reach a test copy.
 - With the owner's `tm_input.ipt` (65,004 bytes, read by the game at start) and then also `options.sav` (1,024) in the test copy's fake cloud, the per-player device table still reads P1 = 1 (keyboard), P2 = 0, both at the main menu and after loading `game0.sav`. Real player 1 still has no controller. So either the owner's choice isn't saved in these files, or it was for Player 1: unknown.
 - Added buffered keyboard events (`IDirectInputDevice8A::GetDeviceData`, slot 10) to the virtual keyboard. The game never calls it (`kbd_data_reads` stays 0), so that's not why the controller box ignores injected keys. The game uses no `GetCursorPos`, `GetAsyncKeyState` or `GetKeyState` either, and its window procedure passes key messages to `DefWindowProc`. How that screen reads its keys: unknown.
+
+### Run 13 (2026-10-24): player 2 joins on a virtual pad (first co-op milestone, local)
+- The owner set Player 2 = "game controller 1" in their real game (2026-10-24 17:56). Only `tm_input.ipt` changed (new SHA-256 `f0ca1734…`; backed up). So **the controller assignment is stored in `tm_input.ipt`**, a raw image of the binding tables with `0xcd`/`0xcc` filler, little-endian.
+  - Its layout beyond the device-name strings: unknown.
+  - With that file in the test copy's fake cloud, the device table reads P1 = 1, P2 = 3 (`Joystick 0` = XInput user 0), already at the main menu.
+- **Run:** real pads hidden, virtual pad 0 connected at start, the owner's `game0.sav` loaded, then the virtual pad pressed buttons. The game showed:
+  > "Player 2 joins the game. Do you want player 2 to take control of your teammate? ENTER Confirm / ESC Cancel"
+  - Virtual Enter (keyboard, player 1) confirmed it.
+  - Real player 1 slot (`game+0x500`) then had character `+0xc` set (health `+0x54` = 100.0) and controller `+0x84` set with type 3. Real player 0 kept the keyboard (type 1, health 49.7).
+  - Holding the virtual left stick down for 1.5 s walked player 2's character off the bottom of the screen; the game then draws an off-screen marker for it. Screenshots: `local/runs/p2_before.png`, `p2_after.png`.
+- Which pad press raised the join prompt: unknown. Buttons were tried in the order A, B, X, Y, BACK, LB, RB, dpad, thumb clicks, START, then stick and triggers, and the prompt was only seen after all of them.
+- **What this proves (observed):** a program-driven XInput pad, invisible to the real devices, is accepted by the game as local player 2, and it can join and move a character. That is the input half of the co-op design (remote input → virtual pad on the host).
+- **Not done:** networking, mirroring the host's world on a second PC, and finding which exact button raises the join prompt.
