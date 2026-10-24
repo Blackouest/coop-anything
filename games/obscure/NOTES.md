@@ -363,3 +363,29 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 #### Proposed playbook additions (for the PR)
 - methods.md, isolation: a Steam game can find its own folder through `ISteamApps::GetAppInstallDir`, so a copied test install reads and writes the store install. Redirect that path inside the process.
 - methods.md, background instances: a DirectInput keyboard read fails while the window is in the background. Injected keys must come with successful empty reads, or key releases are lost.
+
+### Runs 8 and 9 (2026-10-24): the owner's save in the test copy, player 2 assignment
+- **The owner's save:** the owner played their real install themselves to the point where both characters are in the team, and saved.
+  - Files: `game0.sav` (22,528 bytes, CRC ok, version byte 6), `options.sav` (1,024) and `tm_input.ipt` (65,004), in `Steam\userdata\<id>\254460\remote`, plus `remotecache.vdf`. That is the place the code predicted.
+  - `Documents\MRS` is still not used.
+  - Backed up to `local/backup/` and hash-checked. Only `game0.sav` was copied into the test copy's `coop_profile/remote`.
+- **Why the chapter templates showed "Damaged game":** real game saves are 22,528 bytes, the `chapters/chaptr*.sav` templates 30,720. The loader rejects a file whose size differs from the expected size (`+0x5c`).
+- **Loading in the test copy:**
+  - The bot took LOAD → slot 01 ("Central courtyard (ground floor) / 01 / 00:28:46 / NORMAL") → "Load Game? YES".
+  - The level loaded with two team members at the fountain.
+  - Real player 0 character health 49.711, controller type 1. Real player 1 slot present, character NULL, controller NULL.
+  - Story flags at `*(game+0xa24)`: 24 non-zero entries (0..5, 10..13, 113, 121, 124..132, 148, 153, 154, 160). This confirms the array holds story progress.
+- **Player 2 needs a controller assigned first.** Pause → OPTIONS → BUTTON SETTINGS (1/3) "MOVES / TEAMMATE" shows Player 1 = `Keyboard` (W/S/D/A, RIGHT SHIFT walk, NUM 8/2/6/4 team orders) and Player 2 = "No controller assigned". START on virtual pad user 1 does nothing while P2 has no device.
+  - Player 1 moves with **W/A/S/D**, not the arrows. That is why the up arrow in run 7 didn't walk.
+- **Per-player device:** a table at `*(game+0xa20) + 0x2c0`, entry `+4 + player*0x38` = device type (0 none, 1 Keyboard, 3..6 Joystick 0..3).
+  - Setter `FUN_00450590(player, type)`, getter `FUN_004505b0(player)`; both thiscall with ECX = `*(game+0xa20) + 0x2c0`. Seen at `0x5387d2..0x538848`.
+  - Read live: P1 = 1, P2 = 0.
+  - The menu's apply path (`FUN_005381c0`, panel state `+0x98 == 4`): swaps devices if the other player already has the chosen one, calls the setter, then rebuilds devices (`FUN_00586080`, `FUN_00586530(0)`, `FUN_005854f0(1)`, `FUN_005854d0(1)`, `FUN_005854e0(0)`, `FUN_00586ee0()`) and reloads the maps (`FUN_00451f60`).
+- **`CMenuNodeSelectControllerBox`** (vtable `0x654f7c`; found from RTTI: type descriptor → complete object locator → vtable):
+  - Event handler slot 3 (`0x540d00`): event 1 with item id `0x3b6`..`0x3ba` selects device type 1, 3, 4, 5, 6 (box `+0x90`), with `+0x84/+0x88` = done.
+  - The box is not operable with the virtual keyboard: RIGHT/RETURN/DOWN/ESC had no visible effect on that screen and ESC didn't leave it. Pad buttons A, B, X, Y, START, BACK, LB, RB and dpad on user 1 didn't change P2's device either.
+  - The game creates no DirectInput mouse and imports no `GetCursorPos`, so it isn't a mouse screen. **How a human assigns P2 there: unknown.**
+- **Writing P2's device = 4 into memory directly** (WriteProcessMemory, test process only) took (read back 4), but START on pad 1 still didn't fill P2's slot. The device rebuild and map reload that the menu does afterwards were not run. **Unverified** whether those are what binds a real player's controller (`+0x84`).
+- **DLL stage 1b:** a virtual DirectInput mouse hook (GUID_SysMouse, deltas and buttons) was added. Unused: the game never creates a mouse device.
+- **Owner-file guard:** `steam.exe` rewrote `userdata\<id>\254460\remotecache.vdf` at each test launch and exit (mtime 17:43, 17:45) with **byte-identical content** (SHA-256 `5875b10a…`). The owner's three save files kept their hashes. The snapshot now compares that folder by content hash.
+  - Playbook note proposed: even with the game's own remote-storage writes blocked, Steam touches the app's `remotecache.vdf` on every launch, so compare by hash, not mtime.
