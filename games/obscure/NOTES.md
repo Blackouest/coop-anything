@@ -408,3 +408,23 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - Which pad press raised the join prompt: unknown. Buttons were tried in the order A, B, X, Y, BACK, LB, RB, dpad, thumb clicks, START, then stick and triggers, and the prompt was only seen after all of them.
 - **What this proves (observed):** a program-driven XInput pad, invisible to the real devices, is accepted by the game as local player 2, and it can join and move a character. That is the input half of the co-op design (remote input → virtual pad on the host).
 - **Not done:** networking, mirroring the host's world on a second PC, and finding which exact button raises the join prompt.
+
+### Run 14 (2026-10-24): networked input relay, two copies on one PC (UDP on localhost)
+- **Steam API check:** the game's own `steam_api.dll` (2014) exports `SteamNetworking` (`SteamNetworking005`), `SteamMatchmaking` (`SteamMatchMaking009`), `SteamFriends` (013), `SteamUser` (017) and `SteamUtils`. It doesn't export the flat API, so calls go through C++ vtables.
+  - Plan (owner chose Steam, 2026-10-24): use these in-process under app 254460, so players show as playing Obscure. Both players own the game anyway, since the guest runs their own copy.
+  - Not built yet. Stage 2 below uses UDP on localhost behind the same send/receive calls.
+- **Second test copy** `local/obscure-test2`: hardlinks to the four `.hvp` files and `mrs.bik` (link count 2; the game never opened them for writing in any run), plus real copies of the exe, DLLs and small files.
+- **DLL stage 2** (`net.c`):
+  - `OBSCOOP_ROLE=host|guest`, `OBSCOOP_NET=udp`, port `OBSCOOP_UDP` (default 27960), `OBSCOOP_PEER`.
+  - The guest sends its pad 0 (`XINPUT_STATE` layout) at 125 Hz, sends HELLO until WELCOME, and pings every 500 ms.
+  - The host accepts one guest, applies only newer sequence numbers to virtual pad 0, and drops the guest (pad 0 "disconnected") after 3 s of silence or a BYE.
+  - `OBSCOOP_MULTI=1` renames the `obscure_lock` mutex per process. Two copies then ran side by side with no further single-instance check. That's observed: both reached the main menu and later in-game.
+- **Test** `local/runs/net_join_test.py` (checks read from host memory):
+  - PASS: save loaded, player 1 has a character.
+  - PASS: player 2 empty before the join.
+  - PASS: player 2 joined through the network (character set, controller type 3) after the guest's bot pressed A/START on the *guest's* pad, and the host's bot confirmed with Enter.
+  - Packets: host received 3389 inputs, 0 bad, round trip about 0 ms on localhost.
+  - `RESULT: PASS (3/3 checks)`.
+- **Character position (observed):** walking player 2 with the guest's stick changed floats at character `+0x20` (26.0 → 87.5) and `+0x24` (-290.6 → -650.6). These are probably the ground-plane X and Z (derived). Height and facing: not found yet.
+- Owner files unchanged across the run.
+- **Not done:** the Steam P2P transport; and a guest view of the host's world (the guest's own copy sat at its main menu in this test, so the guest player still can't see the game).
