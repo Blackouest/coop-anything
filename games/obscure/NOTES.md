@@ -500,3 +500,25 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Enemy health matched in 60/60 samples. Player health fell (P1 49.7 → 14.7, P2 100 → 78.9) and the guest showed the host's values (220 AddLife corrections, 0 list mismatches).
   - Both screens showed the game's low-health red tint.
 - **Not tested:** an enemy death (the players didn't fight back in this test); enemy animation on the guest (comes from the guest's own AI; its `+0x60` stayed 0 on both copies, so the enemy state field is elsewhere); doors, items, pickups and inventory; cutscenes; giving a joining guest the host's save.
+
+### Runs 26 to 30 (2026-10-24): items, doors, enemy deaths
+- **Items:** in the level manager list `+0x30` (same node layout), keyed by type `+4` and id `+8` (`TM_GetIt` 0x4df840); world position at `+0xc..+0x14`.
+  - In `M000`: 16 `CItPlayerPos` (type 2, spawn/entry markers), 11 `CItDoor` (type 1; `+0x88` 0, `+0x2c` 1), 1 `CItCDR` (type 162, the save CD), 1 `CItPadlock` (type 915).
+  - `+0xfc` is the collected flag only on collectables. Spawn markers and the padlock keep other data there (the padlock a heap pointer).
+- **Collecting** (`FUN_00448a00`, the inventory's AddItem): sets item `+0xfc = 1`, calls item vtable slot 35 (0) and slot 18 `SetVisible(0)`, then adds the item to the character's inventory (count `+0x3c`). `TM_ItIsCollected` treats vtable slot 2 as "is collectable".
+- **Doors:** `TM_EventOpenDoor` sets `+0x88 = 1` and calls `FUN_004f34d0(ms)` on the door, which accumulates opening time in `+0xfc` up to 2000 and turns the door. `TM_ActivateDoor` writes `+0x2c`.
+- **Controls found:**
+  - RETURN is the action key (picks up the CD when standing next to it and facing it).
+  - SPACE, E, RCONTROL and LSHIFT didn't pick it up.
+  - Attacking a Mordeur with RCONTROL, LSHIFT+RCONTROL, LSHIFT+SPACE, SPACE or RCONTROL+SPACE did no damage after teleporting next to it. The attack controls are **unknown**, possibly because no weapon was ready.
+  - Keyboard binding order from `tm_input.ipt` (entries every 0x20c bytes): move ×4, …, RSHIFT walk, NUMPAD 8/2/4/6 team orders, RETURN ×2, ESCAPE, LSHIFT, RCONTROL, UP, DOWN, SPACE, BACKSPACE, ESCAPE, RIGHT ×2, LEFT ×2.
+- **Stage 3e (DLL):**
+  - The host sends every `CItDoor` (`+0x88`, `+0xfc`; the class is recognised by its RTTI name) and every collected collectable, keyed by type, id and vtable, every 6 frames, at most 48 per packet.
+  - The guest copies door fields. For a collectable the host has collected, the guest sets `+0xfc = 1` and makes the same two calls as AddItem (slots 35 and 18 with 0), without adding it to any inventory.
+- **Test commands:**
+  - `teleport x y z [fx fy]`: moves player 1 through the game's own setters, with optional facing.
+  - `hurt <enemy index> <delta>`: the enemy's own AddLife (vtable slot 6) on the main thread.
+- **Run 30, `local/runs/item_test.py`: RESULT: PASS (5/5 checks).** The host's player 1 teleported next to the CD facing it and pressed RETURN. The CD was collected on the host; the guest marked the same CD collected and removed it from its world. No other collectable differs.
+  - Run 28 failed because the character faced away; run 29 because the check also compared the padlock's pointer.
+- **Run 30, `local/runs/combat_test.py`: RESULT: PASS (6/6 checks).** In `C006`, three `hurt 0 -7` on the host took Mordeur 0 from 20 → 13 → 6 → 0, and the host's own death logic set it dead. The guest's Mordeur 0 followed through three AddLife calls and died through its own logic (the guest's TM_KillPlayer fallback stayed unused, kills 0). Dead/alive matched for all six.
+- **Not synced:** inventories, so far from the host's world only (the CD went into the host character's inventory; the guest's copy of that character didn't get it). Door open/close wasn't exercised by a real door in a test (the `M000` doors are level exits). Breakables and `CItGameState*` objects (screens, elevators) aren't synced.
