@@ -558,3 +558,17 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Run 37: `start_host.bat` (sets `SteamAppId`, `OBSCOOP_ROLE=host`, `OBSCOOP_NET=steam`) starts the test copy as a Steam host ("steam: ready"). Owner files unchanged.
 - **Not confirmed (needs the friend):** the session-request callback firing and `AcceptP2PSessionWithUser`; real two-way traffic, latency and loss over Steam's relay; the guest's real controller via `LOCAL_PAD`.
 - **Test package** (`local/package/obscoop-test-0.1.zip`, SHA-256 `a54969e5…`; DLL `2619afbb…`): `xinput1_3.dll`, `obscoop-guest.ini`, `obscoop-host.ini`, `README.txt`. In guest mode the friend's own game sees no pads, so they use the keyboard for menus. While the DLL is installed their own cloud saves are neither used nor touched (co-op saves go to `coop_profile`).
+
+### First session with the friend (2026-10-24, build 0.1): no connection
+- **Owner report:** "The save game does not show up on my friends machine"; then "obscoop log file is missing in friends directory"; then "Save data would not show up we did exactly as described".
+- **Host log** (owner's test copy, 3 host sessions 19:38..19:52): Steam ready every time, and **0 session requests, 0 packets received**. The guest never reached the host. The save is only sent after a guest connects, so it never went.
+- **Friend side:** no `obscoop.log` where expected. Cause **unknown**: the DLL not loading (wrong folder, antivirus), or Windows UAC file virtualization sending an old 32-bit game's writes under `Program Files` to `%LOCALAPPDATA%\VirtualStore\...` (derived possibility; not confirmed).
+- **Build 0.2:**
+  - The status shows in the window title (host waiting/connected; guest looking for the host with a candidate count / connected / host save received - choose LOAD > 01). So a player can see at a glance whether the mod runs.
+  - When the game dir is under Program Files, the log and co-op saves go to `%LOCALAPPDATA%\obscoop\`.
+  - Settings are also read from `obscoop.ini.txt` (a hidden `.txt` extension) and the log says which.
+  - The host also calls `AcceptP2PSessionWithUser` every 2 s for each friend currently in Obscure, in case callback 1202 never fires.
+  - Local check (run 38, UDP, test copies 3 and 2; copy 1 held the owner's live host): `join_test.py` 5/5, and the status lines appeared as designed.
+  - The Program Files path logic is **untested** (no copy under Program Files used).
+  - Package `local/package/obscoop-test-0.2.zip` SHA-256 `8f184acc…`, DLL `639d938d…`.
+- Playbook note proposed: an old 32-bit game under `Program Files` gets UAC file virtualization, so a mod's log or files written "next to the exe" can end up in VirtualStore. Write mod files to a known per-user folder and show status in the game window.
