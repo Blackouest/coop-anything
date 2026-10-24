@@ -46,3 +46,7 @@
   main menu shows Find Servers / Create Server. Issue #13 "Platform Error" did NOT reproduce.
 - `steam -applaunch 2100` from a shell did nothing (no GameAction in console_log); `xdg-open steam://rungameid/2100` worked.
 - Not yet tested: hosting a session, a client joining, any gameplay sync.
+
+## Owner playtest (2026-10-24, reported by owner, not measured)
+- Linux host (Proton), Windows clients via public IP + forwarded UDP 27015. Session worked.
+- "sync was a bit off", "climbing on chains a bit laggy". Unknown: ping, player count, cvars used.
