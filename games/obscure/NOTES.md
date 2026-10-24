@@ -295,3 +295,29 @@ Everything below comes from the exe file and the archives in the test copy. Noth
 - `video_cfg.dat` exists only in the real install (the game wrote it on the owner's own launch, 2026-10-24); a copy is in the test folder.
 - So the first runtime test needs a small injected DLL (proxy `xinput1_3.dll`, the same DLL that will later carry remote input) with both hooks. There is no compiler on the owner's PC yet.
 - Playbook note proposed: "a copy at another path does not isolate the game" also covers `GetAppInstallDir`: a Steam game can find its install folder through Steam rather than from its own exe path.
+
+### Run 1 (2026-10-24): first launch of the test copy, isolation DLL "stage 0"
+What ran (observed):
+- **Setup:**
+  - The test copy has a proxy `xinput1_3.dll` (own code, built with llvm-mingw 20261020, i686; the code lives in `local/` until it gets its own repo), plus `steam_appid.txt` = 254460.
+  - The test copy's `video_cfg.dat` was set to `NVIDIA GeForce RTX 5090 [TnL HAL] - Windowed\0`. That is the windowed form built by `FUN_005ac610` (`<adapter> [TnL HAL] - Windowed`).
+  - The game was started with env `SteamAppId`/`SteamGameId` = 254460, with Steam running.
+- **Result:**
+  - The process ran from the test folder; there was **no relaunch through Steam** and no second `Obscure.exe`.
+  - It reached the main menu in about 6 s, with a window titled "Obscure".
+- **DLL log:**
+  - All 7 import hooks installed: CreateFileA/W, CreateDirectoryA, FindFirstFileA/ExA, SHGetFolderPathA, SteamRemoteStorage.
+  - SteamStub did not rewrite the import table: the watcher checked for 20 s and never re-applied.
+  - `CreateFileA ...\steamapps\common\Obscure\video_cfg.dat` was redirected to the test folder (2 calls).
+  - `SteamRemoteStorage` was proxied. The game asked `FileExists tm_input.ipt` and `FileExists options.sav` (both 0 = first run). So the input config and options are cloud files too.
+  - The game polls **XInput users 0, 1, 2 and 3**. All returned 1167 (ERROR_DEVICE_NOT_CONNECTED, no pad plugged in).
+  - `SHGetFolderPathA` was not called before the main menu.
+- **Memory peek** (ReadProcessMemory only, module base 0x400000, so no ASLR on the exe):
+  - At the main menu the game object `*(0x6ab8e4)` is non-null, `game+8 == 0`, both real-player slots `+0x4fc/+0x500` are NULL, and no level name is set.
+  - `*(game+0xa24)` pointed at text (French script comments), not a flag array. Either the story-flag array only exists in-game, or the offset is wrong: **unverified**.
+- **Owner-file check:** a snapshot was taken before and after (sizes, mtimes and hashes of every real-install file under 2 MB; `Documents\MRS`; `userdata\<id>\254460`) and the two are **identical**.
+  - The game was killed with `taskkill /F`, so its on-exit `video_cfg.dat` save was not exercised.
+
+Next (planned):
+- Inject virtual pad input through the proxy, which is the same path the remote player will use: drive the menus with a scripted pad on user 0 and start a New Game.
+- Then verify the player slots, the controller type values (expected 3 to 6 for pads) and the story-flag pointer in a level.
