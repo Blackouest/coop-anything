@@ -522,3 +522,15 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Run 28 failed because the character faced away; run 29 because the check also compared the padlock's pointer.
 - **Run 30, `local/runs/combat_test.py`: RESULT: PASS (6/6 checks).** In `C006`, three `hurt 0 -7` on the host took Mordeur 0 from 20 → 13 → 6 → 0, and the host's own death logic set it dead. The guest's Mordeur 0 followed through three AddLife calls and died through its own logic (the guest's TM_KillPlayer fallback stayed unused, kills 0). Dead/alive matched for all six.
 - **Not synced:** inventories, so far from the host's world only (the CD went into the host character's inventory; the guest's copy of that character didn't get it). Door open/close wasn't exercised by a real door in a test (the `M000` doors are level exits). Breakables and `CItGameState*` objects (screens, elevators) aren't synced.
+
+### Run 31 (2026-10-24): joining, the host's save goes to the guest
+- **Saves found:** no remote-storage `FileWrite` happened in any test run (the game only saves at the save menu). `FUN_00416640` (save writer) has one direct caller, `FUN_0053fa60` (the save menu, `param 0` = `game%d.sav`). The `recover.sav` branch (`param != 0`) has no direct caller (unknown when it runs).
+- **Stage 3f (DLL):**
+  - The cloud-save proxy keeps the bytes of the last `game*.sav`/`recover.sav` the game read.
+  - When the host has read a save the guest doesn't have yet, it sends it in 1000-byte chunks, go-back-N: up to 4 chunks per frame from the guest's acknowledged offset.
+  - The guest writes the complete file as `game0.sav` in its own co-op save folder (`coop_profile/remote`), never the player's real cloud saves.
+  - Limitation: the LOAD screen reads every slot to list it, so with several saves the host sends the last one listed (it resends when the loaded one is read). The test had one save.
+- **Run 31, `local/runs/join_test.py`: RESULT: PASS (5/5 checks).**
+  - The guest started with no save. After the host loaded its save, the guest had a byte-identical copy (SHA-256 `2f90eee1…`, 22,528 bytes; sent twice: once at the LOAD listing, once at the load).
+  - The guest's bot loaded it; player 2 joined; both copies in level 193 with characters mirrored at 0.0 error.
+- **Still to do for joining:** load the received save on the guest without a human pressing LOAD, and join while the host is already further than its last save (live sync then corrects level, flags and items, but not inventories).
