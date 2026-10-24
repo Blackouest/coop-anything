@@ -1,23 +1,92 @@
-# Obscure (2004) online co-op: triage notes and plan
+# Obscure (2004) online co-op: notes
 
-Intended location in your fork: `games/obscure/NOTES.md`
+Status (2026-10-24): Phases 0 to 2 done. Phase 3 (understand) is under way. The static analysis is done; nothing has been run in the game yet.
+Claim issue: https://github.com/cranebeaker/coop-anything/issues/183. Branch: `game/obscure`.
+
+The summary below is current. The dated sections after `## Sources` are the running log, with the evidence and sources.
+
+## Game identity (AGENTS.md rule 5), recorded 2026-10-24
+- Title: Obscure (Hydravision Entertainment, 2004). Obscure II / The Aftermath (Steam app 254480) is a separate target, for later.
+- Store: Steam, app 254460, build id 215286. The exe says "Mighty Rocket Studio", FileVersion 1.0.1.0, PE timestamp 2014-03-18 (the Steam re-release).
+- `Obscure.exe` SHA-256 `7107439eb6ee1b20cad32e87f7a10a3a95b71c0b5ee26b1ec9139b263577a0f2`, PE32 x86, SteamStub-wrapped (`.bind`), `.text` not encrypted.
+- Engine: **Hydravision in-house** (Zoe/Noe/Hoe/TM layers, `.hvp` archives, `.zwo` models, compiled `.hoe` scripts). **Not RenderWare**, despite the Wikipedia infobox.
+- OS tested: Windows 11 Pro 10.0.26300.
+
+## Where things stand
+- **Existing co-op:**
+  - The game has 2-player local co-op: player 2 presses Start on a second controller once the second character is on screen.
+  - No online co-op mod was found (search list in Phase 1).
+  - Steam Remote Play Together works by player reports, but needs a controller for at least one player.
+- **Netcode:** none in the exe (no socket, dplay or Steam networking imports).
+- **Co-op seams (Phase 3):**
+  - Two real-player slots in the global game object, with characters switchable by script natives.
+  - XInput pads polled per frame through `xinput1_3.dll`, so a proxy DLL can make a remote friend local player 2.
+  - Story state is a 161-byte flag array; level changes go through 3 known fields.
+- **Startup checks:**
+  - Mutex `obscure_lock` (one instance per PC).
+  - `IsDebuggerPresent` (no debugger).
+  - Steam must be running.
+- **Saves:**
+  - Folder: `%USERPROFILE%\Documents\MRS\Obscure\` (from code: `SHGetFolderPathA(CSIDL_PERSONAL)` + `\MRS\` + `\Obscure\`). The test copy shares this folder with the real install.
+  - The game also uses `SteamRemoteStorage` (Steam Cloud).
+  - As of 2026-10-24 the owner has no Obscure saves: no `Documents\MRS` folder and no `userdata/<id>/254460`.
+
+## Plan (updated)
+1. ~~Research~~ done. 2. ~~Workspace~~ done.
+3. **Understand (now):** done statically for players, input, story flags, levels and the startup checks. Next steps:
+   - Runtime checks in the test copy, Steam Cloud off for Obscure (owner decision 2026-10-24):
+     - Log which XInput index player 2 uses.
+     - Confirm the real-player fields and the story flags change as predicted.
+     - Find the per-frame hook.
+   - Decode the `.hoe` bytecode so the story scripts can be read.
+4. **Choose:**
+   - Host authority. The guest's pad input goes to the host's player 2 through a proxy `xinput1_3.dll`.
+   - The host streams world state (both characters, enemies, the 161 flags, doors/items, level changes) to the guest's copy.
+   - Transport: Steam relay (playbook/networking-steam-spacewar.md), unless the owner prefers direct IP.
+5. **Build:** a separate DLL package; no game files shipped. Milestones:
+   - a. Remote input drives player 2.
+   - b. The guest sees the correct world.
+   - c. Levels and deaths stay in sync.
+   - d. Save/load and drop-in/out.
+6. **QA:** bots and real clients (playbook/automated-qa.md). The mutex needs handling to run two copies on one PC.
+7. **Ship, 8. Give back:** as in AGENTS.md.
+
+## Rules to keep in mind (AGENTS.md)
+- Ask the owner before installing software, large downloads, using accounts (Steam, Discord, GitHub) or publishing.
+- Keep private paths and state in `local/`.
+- No game files or assets in any PR. Decompiled code may be used, but it goes in the game's own repo, not this hub (rule 7).
+- Never unpack or remove the SteamStub wrapper; analyse the file as shipped.
+- Stop at the first contradiction between the game and these notes.
+
+## Sources
+- https://github.com/cranebeaker/coop-anything (README, AGENTS.md, DIRECTORY.md, playbook/triage.md, playbook/engine-families.md)
+- https://en.wikipedia.org/wiki/Obscure_(video_game)
+- https://www.co-optimus.com/game/304/PC/Obscure__The_Aftermath.html
+- https://www.co-optimus.com/article/11518/can-t-see-the-obscure-collection-for-the-steam.html
+- https://bloody-disgusting.com/news/3279943/obscure-series-coming-to-steam-with-new-features/
+- https://giantbomb.com/wiki/Franchises/Obscure
+
+---
+
+## Phase 0: triage (2026-10-19, from public sources; kept as written, superseded by the summary above)
+
 Status: Phase 0 (triage) done from public sources. Nothing installed, nothing run.
 
-## Game identity (AGENTS.md rule 5)
+### Game identity (AGENTS.md rule 5)
 - Title: Obscure (Hydravision Entertainment), original 2004 game. Obscure II / The Aftermath is a separate target.
 - Platform target: PC (Steam re-release, 2014). Steam app page referenced in community links: app 254460.
 - Store: Steam (owner confirmed 2026-10-19).
 - Build id, SHA-256 of main exe, exact OS: **unknown, record before any work**.
 - Obscure II / The Aftermath: wanted later, as a separate game entry. Not part of this scope.
 
-## Observations (sourced)
+### Observations (sourced)
 - Local 2-player drop-in co-op exists; the second character is an AI buddy a human can take over. (Co-Optimus, Giant Bomb)
 - No online or LAN co-op listed for the PC version. (Co-Optimus, co-op.gg)
 - Steam re-release added 16:9 and controller support. (Bloody Disgusting, Co-Optimus)
 - Not in coop-anything DIRECTORY.md or games/ as of 2026-10-19.
 - Wikipedia infobox lists engine as RenderWare.
 
-## Unknowns (do not guess)
+### Unknowns (do not guess)
 - Exact engine and version in the Steam build (check DLL names, exe version info, file extensions).
 - Whether any netcode or debug symbols remain in the exe.
 - How the game stores state: character roster, deaths, inventory, puzzle and door flags, saves.
@@ -25,10 +94,10 @@ Status: Phase 0 (triage) done from public sources. Nothing installed, nothing ru
 - Whether existing community tools (modding, trainers, texture/model extractors) exist for the format.
 - Whether anyone has already started an online co-op attempt (check issues/PRs on coop-anything, forums, Discord).
 
-## Difficulty rating
+### Difficulty rating
 Closed binary, no engine multiplayer, no scripting: "very hard" per playbook/triage.md. Scope is small though: 2 players, one human-controlled buddy slot already exists in the game.
 
-## Plan
+### Plan
 1. **Research (Phase 1).** Follow playbook/research.md. Search GitHub, forums, ModDB, Steam discussions, Discord for any Obscure online, LAN, trainer or modding tool. Mine bug lists if anything turns up. Check engine-families.md for RenderWare co-op work to reuse.
 2. **Workspace (Phase 2).** Copy the install into a test folder (never touch the real install or saves). Set up Ghidra or x64dbg and a notes file. Ask owner before installing anything.
 3. **Understand (Phase 3).** Identify the engine, then map: main loop, player/buddy controller (the AI-buddy slot is the natural hook for a remote player), character switching, character death, inventory, doors/puzzle flags, level loading, saves.
@@ -42,19 +111,11 @@ Closed binary, no engine multiplayer, no scripting: "very hard" per playbook/tri
 7. **Ship (Phase 7).** One-click install, host and join instructions, README with known issues.
 8. **Give back (Phase 8).** Add directory entry in data/directory.yaml, write games/obscure/README.md from templates/game.md, open a draft PR (owner reviews the diff first).
 
-## Rules to keep in mind (AGENTS.md)
+### Rules to keep in mind (AGENTS.md)
 - Ask the owner before installing software, large downloads, using accounts (Steam, Discord, GitHub) or publishing.
 - Keep private paths and state in `local/`. No game files, cracks or decompiled source in any PR.
 - Stop at the first contradiction between the game and these notes.
 - Open a "claim a game" issue on coop-anything before starting real work.
-
-## Sources
-- https://github.com/cranebeaker/coop-anything (README, AGENTS.md, DIRECTORY.md, playbook/triage.md, playbook/engine-families.md)
-- https://en.wikipedia.org/wiki/Obscure_(video_game)
-- https://www.co-optimus.com/game/304/PC/Obscure__The_Aftermath.html
-- https://www.co-optimus.com/article/11518/can-t-see-the-obscure-collection-for-the-steam.html
-- https://bloody-disgusting.com/news/3279943/obscure-series-coming-to-steam-with-new-features/
-- https://giantbomb.com/wiki/Franchises/Obscure
 
 ---
 
