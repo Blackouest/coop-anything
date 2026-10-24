@@ -572,3 +572,14 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - The Program Files path logic is **untested** (no copy under Program Files used).
   - Package `local/package/obscoop-test-0.2.zip` SHA-256 `8f184acc…`, DLL `639d938d…`.
 - Playbook note proposed: an old 32-bit game under `Program Files` gets UAC file virtualization, so a mod's log or files written "next to the exe" can end up in VirtualStore. Write mod files to a known per-user folder and show status in the game window.
+
+### Second session with the friend (2026-10-24, build 0.2): connected and playable
+- **Owner report:** "it works and controllable". The friend's guest found the host through the friends scan ("4 of 22 friends in a game, 1 in Obscure"). It received the save, switched to the guest-played character (id 4, later id 5 when the host's team changed), and mirrored a CD pickup. Round trip 62-78 ms, with patches of about 500 ms.
+- **Open bugs reported by the owner:**
+  1. On the host the camera follows the remote player; on the guest it stays on the host's character.
+  2. The inventory is shared, controllable only by the remote player, and has no per-player inventory or give-item.
+- **Observed on the host during the session:** P1 = char 2 (keyboard) with leader flag `+0x84` = 0; P2 = char 5 (pad) with `+0x84` = 1. The join gave the leader flag to player 2.
+- **Derived (not verified):** `+0x84` marks the single "leader" character, which drives the room camera and the inventory menu. The guest's switch (`FUN_0044b7e0`) sets real player `+0xc` but does not give the camera to that character.
+  - Camera code is around `0x40b000-0x40e000`: CCameraManager vtable `0x642680`; zone owner `+0x184` on cameras; `FUN_0040d130` changes zone owners; recenter is `FUN_0040b5b0`. Which field selects the followed character: **unknown**.
+- **Next:** find the camera target field, keep the leader flag on P1's character on the host and on the guest's own character on the guest, and re-test with `mirror_test.py`. Separate inventories plus a give-item feature would be new game design, beyond mirroring.
+- Minor: "guest has the whole save" is logged on every duplicate acknowledgement (log spam).
