@@ -709,3 +709,17 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Watchdog (new):** if the main loop stops for 5 s, the DLL logs the main thread's EIP and the exe return addresses on its stack (two samples 1 s apart) and each character's state/requested state. So the next freeze on the friend's PC leaves its cause in `obscoop.log`. Test command `stall <ms>`.
 - **Regression on the 0.5 DLL (one fresh pair each):** `stall_test.py` 4/4 (watchdog logged two samples, character states and the recovery after an 8 s stall), `bag_test.py` 9/9, `give_test.py` 7/7, `door_test.py` 5/5, `p2door_test.py` 7/7 (including 24 s of player 2 walking with the guest applying state throughout).
 - Package `local/package/obscoop-test-0.5.zip` (DLL SHA-256 `02dc71e6…`); host test copy has the same DLL.
+
+### Requested states, static map (2026-10-24, while the owner tests 0.5)
+- `FUN_00432e40(state)` is the request function (writes `+0x230` if allowed from the current state); `FUN_0043bf60` starts the request from idle (state 10). Requesters found by call sites, classes by RTTI of the vtable holding the caller (`local/runs/rtti_of.py`).
+- **Observed in code (derived names):**
+  - 10 idle; 20 walk, 30 run (player input `FUN_0044c2b0`, by stick distance); 31 run of character 3 when its +0x44 object has +0x10c set (Kenny's ability, name derived).
+  - 40 interact / pick up: checks the target object `+0x20c` (vtable +0x74) first, so with no target it doesn't start.
+  - 50 and 52: door use, requested from `FUN_004f3eb0` (uses game `+0x5d0` entry, `+0xa48`). Started with **no check**: run 57's guest hang.
+  - 85, 86, 87: `CItMobileRack` (push a rack). 122, 132, 135: `CItHookLadder`. 122, 123, 132, 133: `CItRoast`. 141/142: `CItLock`.
+  - 102: use an item (`FUN_00435080`, item from the bag); 103: swing (`FUN_00435180`).
+  - Unknown requesters: 42, 70→71, 80→81, 136, 137.
+- **Safe list now (build after 0.5, untested):** 10, 11, 20, 30, 31, 100, 101, 103. 31 was added: without it the guest showed Kenny's run as idle (derived, not observed).
+- **Next (not started):** mirror the object interactions (doors 50/52, rack, ladder, roast, lock) by sending the target object's (type, id) with the event, so the guest's copy of the character gets its own copy of the object as context. Needs runtime tests (side effects on the guest: door → level change is blocked there already).
+- **Prepared, not run yet (owner playing):** `local/runs/chaos_test.py` + `chaos_run.sh`. The guest connects through the hub's `tools/chaos` relay (host UDP 27960 ← relay 27961 ← guest). For good_wifi, bad_wifi, mobile_tether, transatlantic and hell: a give must reach the guest, player 2's walk must converge, the guest's main loop must keep running. Then a 4 s outage must not drop the guest; a 15 s outage is only observed (drop/rejoin behaviour unknown).
+- **Drafts for Phase 8 (local, not committed):** `games/obscure/README.md` from the template, `local/draft_directory_entry.yaml` (url and license wait on the owner's own repo for the DLL).
