@@ -321,3 +321,45 @@ What ran (observed):
 Next (planned):
 - Inject virtual pad input through the proxy, which is the same path the remote player will use: drive the menus with a scripted pad on user 0 and start a New Game.
 - Then verify the player slots, the controller type values (expected 3 to 6 for pads) and the story-flag pointer in a level.
+
+### Runs 2 to 7 (2026-10-24): bot input in the test copy
+Every run was started and stopped with `local/runs/run.sh`, which compares a before and after snapshot of the owner's files (real install, `Documents\MRS`, Steam `userdata\<id>\254460`). All 6 runs: **owner files unchanged**. The game wrote nothing in the test copy either: no saves, and nothing in `coop_profile/remote` except the file a test put there.
+
+#### DLL stage 1 (own code, in `local/coopdll` for now)
+- **Command pipe** `\\.\pipe\obscoop_<pid>`, one line per command:
+  - `pad <user> <buttons hex> [lx ly rx ry lt rt]` / `unpad <user>`: virtual XInput pads 0 to 3.
+  - `key <DIK hex> <0|1>`: virtual DirectInput keyboard key.
+  - `stats`: poll counts and whether the game has the foreground.
+  - `ping`.
+- **Virtual pads:** `XInputGetState` returns the virtual state for that user index. `OBSCOOP_VPADS=1` reports pad 1 as connected from the first poll.
+- **Virtual keyboard:** `DINPUT8!DirectInput8Create` is hooked (import table), then `IDirectInput8A::CreateDevice` (vtable slot 3). For `GUID_SysKeyboard`, `IDirectInputDevice8A::GetDeviceState` (slot 9) gets the virtual keys OR-ed in.
+- **Background running** (`OBSCOOP_BACKGROUND=1`): `USER32!RegisterClassA` is hooked to wrap the game's window procedure `FUN_00546660`, so `WM_ACTIVATE` always reports active. That procedure stores the active state in `DAT_0069b870`, and the main loop (`FUN_00547290`) only updates input while it's set.
+- **Bot:** `local/runs/bot.py`: pad presses, key taps, `PrintWindow` screenshots. `local/runs/peek.py`: reads the game object, player slots and story flags with ReadProcessMemory.
+
+#### Observed
+- The game polls all 4 XInput users every frame, about 3,000 polls/s with the window active.
+- **Devices** (`FUN_00586ee0`): `Keyboard` (controller type 1), `Mouse` (2), and XInput users 0 to 3 as `Joystick 0`..`Joystick 3` (types 3 to 6).
+- **Input maps:** `default.ipt` maps the keyboard (RETURN, ESCAPE, SPACE, arrows, numpad, LSHIFT, RCONTROL). `default_pad.ipt` maps `Joystick 0`, with buttons `Button 01`..`Button 16` and axes `AXE X/Y`, `ROT X/Y`.
+- **The menus don't react to a virtual pad** (A, START, DOWN on user 0, with or without "connected at start"), even though the game reads it and has the foreground. They react to the virtual keyboard: Enter on NEW GAME opens DIFFICULTY.
+- **Background:** without the window-procedure wrap, the game stops polling entirely when its window loses the foreground (poll counter frozen).
+  - With the wrap, it runs, but the real DirectInput keyboard read fails while unfocused. The first fix only replaced the read while a virtual key was down, so a key's release was never seen and the next press didn't register (stuck on DIFFICULTY twice).
+  - Fix: in background mode, always turn a failed read into an empty successful one.
+- **Reached gameplay with no human input:** New Game → Normal → opening video (skip prompt "Press ESC to stop watching the video") → Kenny in the gym. Screenshot in `local/runs/shot_play.png`.
+- **In-game memory:**
+  - Real player 0 exists, with character `+0x54 == 100.0` (health, as derived) and controller type 1 (keyboard).
+  - Real player 1 exists but has character NULL and controller `+0x84` NULL. This fits the second character arriving later.
+  - `*(game+0xa24)` is now a 161-byte array, all 0 except index 160 (values 72, then 6, in two runs). So the story-flag pointer is right in-game; at the menu it pointed at unrelated text.
+  - `game+8` stayed 0 in-game, so 5 is a transient "change level" value.
+- **Not confirmed:**
+  - The up arrow (DIK 0xC8, 1.2 s) turned Kenny, but nothing in the first 0x200 bytes of the character object changed as a float. Position lives elsewhere (an entity or physics object): **unknown**.
+  - START on virtual pad user 1 with only one character in play: no change to real player 1.
+
+#### Saves
+- Slots are `game0.sav`..`game9.sav` plus `recover.sav` (save writer `FUN_00416640`); options in `options.sav`; input map in `tm_input.ipt`.
+- All are Steam remote-storage files. The LOAD screen asked for `game0..9.sav`.
+- **Checksum:** standard CRC-32 (table at `0x69c560` equals the standard table; `FUN_00576640`) over bytes `[4:]`, stored little-endian in bytes `[0:4]`. Every `chapters/chaptr0..9.sav`, `default.sav` and `default2.sav` in datapack matches. The byte at offset 4 is a version, and must be 6 for `options.sav`.
+- A chapter template copied as `game0.sav` shows **"Damaged game"** on the LOAD screen. The game-save loader (around `0x452400`) runs `FUN_0044f1e0` on the buffer first, then compares the CRC with a value from a slot index (`FUN_00415c30` entry `+0x10`, version `+0x14`, slot `+0x18`), not with the file header. The templates are not drop-in saves: **unknown** why.
+
+#### Proposed playbook additions (for the PR)
+- methods.md, isolation: a Steam game can find its own folder through `ISteamApps::GetAppInstallDir`, so a copied test install reads and writes the store install. Redirect that path inside the process.
+- methods.md, background instances: a DirectInput keyboard read fails while the window is in the background. Injected keys must come with successful empty reads, or key releases are lost.
