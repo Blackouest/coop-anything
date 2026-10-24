@@ -142,3 +142,88 @@ Try Remote Play Together first (zero install, already supported on the store pag
   - Temurin JDK 25.0.4.1+1 (`OpenJDK25U-jdk_x64_windows_hotspot_25.0.4.1_1.zip`, `00c847d804f4a78e9f04f2683faf14fed898535b177b7fc704486cb0284e9283`, from the Adoptium API).
 - Pitfall: **Ghidra 12.2 needs Java 25** (`application.java.min=25` in `Ghidra/application.properties`), not Java 21. `JAVA_HOME_OVERRIDE` in `support/launch.properties` is not enough on Windows, because `analyzeHeadless.bat` first looks for `java` on PATH or `JAVA_HOME` ("The 'java' command could not be found"). Set `JAVA_HOME` and PATH for the call.
 - Ghidra headless smoke test: `analyzeHeadless <proj> Obscure -import <test copy>\Obscure.exe` completed with "Analysis succeeded", "Save succeeded", "Import succeeded" (exit 0). The project is in `local/ghidra-proj/`. Workspace ready for Phase 3.
+
+---
+
+## Phase 3: understand (2026-10-24), static analysis of build 215286
+
+Everything below comes from the exe file and the archives in the test copy. Nothing has been run in the game yet. Addresses are virtual addresses in `Obscure.exe` (image base 0x400000), SHA-256 `7107439e...77a0f2` only.
+
+### Tools used
+- Ghidra 12.2 headless: auto-analysis, then `DecompileAll.java` (from cranebeaker/deus-ex-coop, read before use). 7,738 functions, 1 failed.
+- Own scripts, in `local/` for now:
+  - `ExportXrefs.java`: strings with the functions that reference them.
+  - `DecompileAt.java`: creates, names and decompiles functions from a TSV.
+  - `hvp.py`: HVP archive reader.
+  - `pe.py`: reads bytes at a virtual address.
+- Pitfall: Ghidra's auto-analysis didn't label the MSVC vtables (`vftable` symbols: 0), so functions reached only through a vtable were never created. Fix: read the vtable address from the constructor (`*this = &PTR_...`), read the slots from the file, and create the functions with `DecompileAt.java`.
+
+### Archives (.hvp): observed, reader verified on all four
+- Big-endian. Header 0x28 bytes:
+  - magic `HV PackFile\0`, u16 3, u16 1;
+  - u32 root entries, u32 total entries, u32 file entries, u32 TOC size;
+  - 8 bytes unknown.
+- TOC entries, depth first, each starting with u32 entry size (counting itself) and a u8 type:
+  - type 0, directory: u32 0, u32 child count, u32 name length, name.
+  - type 1, file: u32 compressed, u32 stored size, u32 size, u32 crc, u32 absolute offset, u32 name length, name.
+- Compressed data is zlib (`78 da`). Checked on 847 files: all inflate to exactly the listed size.
+- The `crc` field is **not** standard CRC-32: 2 of 847 match, probably by chance. It only matters for repacking, and it's **unknown**.
+- File counts: cachpack 732, datapack 1708, kinepack 40 (`.bik` cutscenes, stored), strmpack 6447 (`.ogg` voice/music).
+- Content types (datapack/cachpack):
+  - `.hoe` ×202: compiled behaviour scripts. Named globals such as `gPlayerDetected`, `gIsRespawn`, `gHelpRespawn`, `gPNJs`; 179 of them name `TM_*` natives.
+  - `.tm` ×150: per-level binary data, mostly floats (`<level>_n.tm`). Its meaning is unknown.
+  - Also: `.noe` ×100, `.dip` ×139, `.coa` ×81.
+  - Text configs: `gdatas*.ini` (weapon and difficulty tables, plain text with French comments).
+  - `default.ipt` and `default_pad.ipt`: input maps, a binary table with device names such as "Keyboard".
+  - `_common/chapters/chaptr0..9.sav` and `default.sav`/`default2.sav`: save templates, 30720 bytes each (22528 for `default.sav`).
+
+### Script natives (observed)
+- 255 natives. Each is a class with a constructor calling `FUN_005b8860(name, flag, nargs)` and setting its vtable. Slot 3 is the body (all 255 slot-3 targets are distinct).
+- The by-name factory is `FUN_004a3140`. The full table (name, flag, args, constructor, vtable, body) is in `local/decomp/natives.tsv`.
+- Two families: `TM_*` (world, events, players, music) and the AI ones (`GetDistanceWithPlayer`, `SelectPlayer`, `LookAt` and others, the `CHoeSlh_*` classes).
+
+### Players and controllers (observed in code, field meanings derived)
+- `DAT_006ab8e4` is the global game object.
+- `game+0x4fc` and `game+0x500` are the **two real-player slots** (`CRealPlayer*`, index 0 and 1). Natives reject an index of 2 or more, so there are exactly 2 human slots.
+- In a real player:
+  - `+0xc`: the controlled character. `TM_GetRealPlayer` returns it only if `+0x58 == 0`, `+0x5c == 0` and float `+0x54 >= 1e-5` (alive check; that +0x54 is health is derived).
+  - `+0x84`: the controller object; its `+4` is the port/type returned by `TM_GetRealPlayerControlerPort` (`0x4dfc20`).
+- `FUN_0044b3b0(character)` switches which character a real player controls. `TM_ChangeTeammate` (`0x4df680`) and `TM_SetTeammate` (`0x4de350`) both call it.
+- `TM_GetMyPlayer` (`0x4de890`) matches characters by `+0x68` against `*(game+0x57c)+0x60`. It walks one of two lists depending on `*(...+0x10) == 7`.
+- Controller polling is `FUN_005868e0`. Controller type `+4`:
+  - 1: keyboard (state buffer at `+0x138`, 0x100 bytes).
+  - 2: probably a DirectInput joystick (unconfirmed).
+  - 3 to 6: XInput user 0 to 3, read by `XInputGetState(index, this+0x250)` and rumbled by `XInputSetState`. The raw sticks become floats at `+0x260..+0x26c` and the buttons are unpacked to `+0x270..+0x2ac`.
+  - Pad names "Pad 1".."Pad 4" (`FUN_005417a0`) and "Joystick 0".."Joystick 3" (`FUN_00586ee0`).
+- XInput is imported by ordinal from `XINPUT1_3.dll` (#2 XInputGetState, #3 XInputSetState), and DirectInput through `DirectInput8Create`.
+
+### Story, levels, saves (observed)
+- **Story flags:** a byte array of 161 entries at `*(game+0xa24)`, written by `TM_SetGameEventState` (`0x4d8c70`) and read by `TM_GetGameEventState` (`0x4d8c30`).
+- **Per-event state:** `TM_SetEventState` (`0x4d8c10`) writes `event+0x18`.
+- **Level change:** `TM_LoadLevel` (`0x4ddb80`) and `TM_EventChangeLevel` (`0x4d92a0`) set `game+8 = 5` (the game state machine, value 5 = level change requested: derived), copy the level name to `game+0x590`, and set the entry index at `game+0x5d0`.
+- **Saves:** they go through `CZMemoryCardSteam`, and the exe imports `SteamRemoteStorage`, so **saves are probably Steam Cloud files** (derived). Error strings: "Not a valid save file", "Save directory does not exist", "Can't read this file because the number of player saved is different of actual player number!".
+
+### Startup checks (observed)
+- `CreateMutexA(NULL, 0, "obscure_lock")`: if the mutex already exists (`GetLastError() == 0xb7`), the game doesn't start. Two copies on one PC need this handled in our test copy, see playbook/multi-instance-testing.md.
+- `IsDebuggerPresent()`: the game only runs its main function (`FUN_00547290`) when no debugger is attached. Don't attach a debugger; use an injected DLL and logs instead.
+- `SteamAPI_Init` failure shows a localized "Steam must be running" message and exits.
+- No network code anywhere: no winsock or dplay imports, no Steam networking or matchmaking interfaces.
+
+### Derived: co-op design implications
+- **Remote input:**
+  - Plan: a proxy `xinput1_3.dll` in the test folder that forwards to the real system DLL, and reports a virtual pad on one XInput index whose state comes from the remote player. The game then treats them as local player 2. No exe patch needed.
+  - The Remote Play "same keyboard" report fits the code: there is one keyboard device, so two remote keyboards merge into it.
+- **What to sync:**
+  - Host-authoritative world.
+  - Guest view: the guest runs its own copy and mirrors the host. Characters (positions and animation of the 2 slots plus the teammates the host's AI drives), enemies (`CPlayerPNJ*`), the 161 story flags, event states, items and doors (`CItGameStateManager`), and level changes (`game+8/+0x590/+0x5d0`).
+  - Simpler first milestone: input-only on the host (the guest streams video, like Remote Play but with our own input path). That's only useful as a stepping stone.
+- **Risk before any runtime test:**
+  - Steam Cloud saves (`SteamRemoteStorage`). Running the test copy under the owner's Steam account could sync test saves over the owner's real cloud saves.
+  - Before the first launch, back up the owner's save files and decide how to keep test saves apart (Steam Cloud off for this game, or a separate account). That decision belongs to the owner.
+
+### Unknowns
+- Meaning of the `.tm` files; the `.hoe` bytecode format (needed to read story scripts as text); the HVP crc algorithm.
+- The character, enemy and item structs, beyond the fields above.
+- Where the per-frame main loop is, the best hook point for sync; `PeekMessageA` appears once, which is a candidate.
+- Whether controller type 2 is DirectInput, and how a pad gets assigned to real player 2 (the controller-select menu `CMenuNodeSelectControllerBox`).
+- Save file location and format; whether the 161 flags plus the chapter `.sav` templates are the whole story state.
