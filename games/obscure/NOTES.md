@@ -868,3 +868,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - SSR is listed but off: no material information, so every surface would reflect.
   - Both run at ~280 fps in the test copy.
 - **Package 1.5.** Co-op not run on 1.2–1.5.
+- Package `local/package/obscoop-test-1.6.zip` (DLL SHA-256 `2f8a52ce…`), host test copy updated. Tested on this DLL: build only: 1.5 minus the font texture swap (reverted on owner request; likely cause of letters under a character: swap keyed by a freed and reused texture address).
