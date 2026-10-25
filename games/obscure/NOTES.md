@@ -877,3 +877,12 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Enemies (1.7, built, not run):**
   - Before: the guest placed enemies only when a `PKT_PNJ` arrived; the guest's own AI moved them in between.
   - Now: `PKT_PNJ` carries the host's send time (protocol 3). The guest keeps 32 snapshots and every frame places each enemy at the same delayed host time as the characters (`g_last_rt`). Position and facing are blended per list index when the vtables match; no blending across a jump over 150 units or for a dead enemy; extrapolation up to 50 ms. Health and death flags come from the nearest snapshot.
+
+### RTX Remix feasibility: draw statistics (2026-10-25)
+- **Question (owner):** is NVIDIA's RTX Remix (https://github.com/NVIDIAGameWorks/rtx-remix, runtime dxvk-remix) usable? Remix targets Direct3D 8/9 games on the fixed-function pipeline; shader-heavy games are unlikely to work ([compatibility docs](https://docs.omniverse.nvidia.com/kit/docs/rtx_remix/1.2.4/docs/introduction/intro-compatibility.html)). No report of Obscure with Remix found.
+- **Measured (observed):** read-only counter DLL (`local/coopdll_ds/`, env `OBSCOOP_DRAWSTATS=1`, hooks device slots 44/81-84/87/89/92/107/17) in a clean test copy (`obscure-test2`, no d3d9.dll, SSAA 1), host save loaded into the courtyard level, 37 log lines over ~7000 frames from menu to level.
+  - Every draw is fixed-function: VS only / PS only / VS+PS = 0 in all 36 sampled frames; no non-NULL vertex or pixel shader was ever bound (`SetVertexShader` is called ~45x per frame, always with NULL). About 520 draws per frame, all with an FVF (no vertex declarations).
+  - `SetTransform` WORLD/VIEW/PROJECTION are used (about 30 world transforms per frame, 1 view, 1 projection), which is what Remix needs to recover geometry and camera.
+  - The `.vso` strings in the exe (`vshader_basic_pncu`, `vshader_darkaura_pncu`) were not used in this run; the dark-aura effect and other areas are untested.
+- **Not tested:** Remix itself (needs a pinned download, owner approval), other levels, the dark-aura effect, the mod's SSAA/ReShade (both would conflict: Remix replaces `d3d9.dll`).
+- **Derived:** the game looks like a good Remix candidate. Next step if wanted: download the Remix runtime (official release, SHA-256 checked), put it in a test copy with the mod's SSAA off, check that the capture works.
