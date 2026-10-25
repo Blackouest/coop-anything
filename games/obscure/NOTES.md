@@ -800,3 +800,16 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Graphics (observed):** the exe imports `d3d9.dll` (`Direct3DCreate9`), so it is a Direct3D 9 game.
 - Package `local/package/obscoop-test-1.1.zip` (DLL SHA-256 `0f339489…`), host test copy updated. Tested on this DLL: none (owner: no test needed; built clean, -Wall -Wextra).
 - Package `local/package/obscoop-test-1.2.zip` (DLL SHA-256 `c677322a…`), host test copy updated. Tested on this DLL: none for co-op; supersampling checked visually in a windowed test copy (3D, HUD, pause menu fill the window, ~280 fps; menu text half size); fullscreen-to-borderless path not run.
+
+### In-game supersampling (1.2, 2026-10-25)
+- **Owner's PC (observed):** NVIDIA GeForce RTX 5090, desktop 2560x1440 @ 279 Hz.
+- **Owner asked** for a higher internal render resolution inside the game, as an optional setting.
+- **How (`coopdll/src/render.c`):**
+  - Hooks `d3d9.dll!Direct3DCreate9` → `IDirect3D9::CreateDevice` (slot 16) → device `Reset`/`Present` (slots 16/17).
+  - The back buffer becomes SSAA× wider and taller. Present shrinks it with `StretchRect` LINEAR into an extra window-sized swap chain (2:1 = 2x2 box; SSAA 4 = two 2:1 steps).
+  - Exclusive fullscreen becomes a borderless window over the monitor.
+- **Layout (code + observed):**
+  - The game lays out viewports, HUD and menus from renderer `*(0x6ab890)` `+0x188/+0x18c`: `GetClientRect` of its window when `+0x124 == 0` (windowed), else the mode size `+0x118/+0x11c` (around `0x5ab5a0`).
+  - First try drew into the top-left quarter. Fix: the exe's `GetClientRect` for the D3D window answers SSAA× bigger, and after a fullscreen→borderless switch `+0x124` is set to 0.
+- **Check (windowed test copy, 1904x1421 window, SSAA 2 → 3808x2842):** 3D, HUD icons and the pause menu fill the window, ~280 fps. **Menu text is half size**: the font is drawn in fixed pixels. The fullscreen→borderless path was **not run**.
+- **Setting:** `SSAA` (ini) / `OBSCOOP_SSAA`. Missing or 1 = off, 2, 4. Package 1.2 ships `SSAA=2` in the guest ini; the host's `start_host.bat` sets `OBSCOOP_SSAA=2`.
