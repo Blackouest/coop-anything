@@ -3,17 +3,17 @@
 | | |
 |---|---|
 | Engine | IW 1.0 (id Tech 3 derived) |
-| Versions tested | PC retail repack: CoD 1.5 (`CoDSP.exe` SHA-256 `c755c7da...5c69f47`), UO 1.51 (`CoDUOSP.exe` SHA-256 `c17e57c0...8aa7e325`), French language packs. Full hashes in [NOTES.md](NOTES.md). |
+| Versions tested | CoD 1.5 (`version.inf` ExtVersion=1.5), UO 1.51 (ExtVersion=1.51), French language packs. Build identity (PE timestamps) in [NOTES.md](NOTES.md). |
 | Projects | none found; directory entries "Call of Duty" and "Call of Duty: United Offensive" (`kind: gap`) |
 | QA level | none |
-| Last updated | 2026-10-24 |
+| Last updated | 2026-10-25 |
 
 ## Where things stand
 
 **Research only: nothing is playable.** No campaign co-op mod exists for either game as far as these searches go.
 This write-up maps what the singleplayer engine still has and what a co-op mod would need. The native networking
-part is not started and is **looking for someone to take it on**. The owner of this research is still looking into
-a way to build it, so check the open PRs and issues for "call of duty" before starting from scratch.
+part is early and open for contributors, so check the open PRs and issues for "call of duty" before starting from
+scratch.
 
 ## Existing work
 
@@ -74,11 +74,11 @@ Not applicable yet.
 
 ## Next steps
 
-1. **The native module** for `CoDSP.exe` 1.5. It is the blocker, and the owner keeps looking for a way to do it. If you want to
+1. **The native module** for `CoDSP.exe` 1.5. It is the blocker and early work is underway. If you want to
    pick it up, comment on the PR or open a claim issue. Start from the RE notes and verify every address at runtime first.
 2. Script layer for player 2, from the plan in [NOTES.md](NOTES.md): shared libraries first (`_load`, `_loadout`,
    `_spawner`, `_mg42`, `_autosave`), then triggers per mission, small maps first.
 3. Same analysis for UO 1.51 (`CoDUOSP.exe`, `uo_gamex86.dll`).
-4. Owner requirements for the finished mod (recorded in NOTES.md): 2 players first, designed for 4; Steam Spacewar
+4. Design goals for the finished mod (in NOTES.md): 2 players first, designed for 4; Steam Spacewar
    (AppID 480) relay with direct IP as fallback; downed and revive, or respawn next to the teammate after 5 s; host-driven
-   progression with a level select; clear diagnostics when something fails on Windows 11.
+   progression with a level select; clear diagnostics when a launch fails.

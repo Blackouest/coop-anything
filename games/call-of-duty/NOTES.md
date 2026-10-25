@@ -1,47 +1,44 @@
 # Call of Duty (2003) + United Offensive: co-op notes
 
-## Game identity (observed 2026-10-23)
+## Game identity
 
 | | Value |
 |---|---|
-| Store | repack of the PC retail release (not Steam, not GOG) |
 | CoD version | 1.5 (`version.inf` ExtVersion=1.5, IntVersion=5.3) |
 | UO version | 1.51 (`version.inf` ExtVersion=1.51, IntVersion=12.4) |
 | Engine | IW engine 1 (id Tech 3 derived); `detect_engine`: "id Tech 3 (or derived)" |
 | Language | French localized paks (`localized_french_pak*.pk3`) |
-| OS | Windows 11 Home 10.0.26200 |
 
-| File | SHA-256 | PE timestamp |
-|---|---|---|
-| CoDSP.exe | c755c7da411c87039ade462a2299402c3c4ca5c4fc4f1ae5cea6e25b05c69f47 | 1078214618 (2004-03-02) |
-| CoDUOSP.exe | c17e57c060f08ef65d7cddea738cced61ab7ccb6d98df95fe185b1ab8aa7e325 | 1093030896 (2004-08-20) |
-| CoDMP.exe | 2b9f5825f8fe1173d6831a7ef4f967e813a6bf620343e7428c8ffae712cdeae9 | |
-| CoDUOMP.exe | 64a5aab259160324078fb5f13f835d26128ba2c3c19d104a493f228434d9d205 | |
-| gamex86.dll (SP game) | 27930aa3f663d0af39a90e6956c980be1e599e0f0c98191a9fb7eaba61481577 | 1078214576 |
-| uo_gamex86.dll (UO SP game) | 9fd3665ba2b67426bfd76df673d7e6575e237224bd5e86c4b979a4287bbeb32e | 1093030666 |
+| File | PE timestamp |
+|---|---|
+| CoDSP.exe | 1078214618 (2004-03-02) |
+| CoDUOSP.exe | 1093030896 (2004-08-20) |
+| gamex86.dll (SP game) | 1078214576 |
+| uo_gamex86.dll (UO SP game) | 1093030666 |
 
-All 32-bit PE32.
+All 32-bit PE32. A native module must still check its target build before patching; derive that
+check against the player's own copy at build time rather than shipping a redistribution's hashes.
 
 ### Observations
 - `CoDUOSP.exe` carries sections `stxt774`, `stxt371` (SafeDisc section names). `CoDSP.exe` does not. Unknown whether code is still encrypted.
 - SP game logic is a separate DLL (`gamex86.dll`, `uo_gamex86.dll`), like Quake 3's qagame. Client game `cgamex86.dll`, UI `uix86.dll`.
 - PunkBuster files in `pb/` (MP only). Stay away from it.
 
-## Owner requirements (2026-10-23)
+## Design goals for the mod
 - CoD1 campaign first, then port to UO. 2 players first, design for 4.
 - Networking: Steam Spacewar (480) relay by default, direct IP + UPnP fallback.
 - Death: downed + revive (WaW-like) if possible; fallback respawn on teammate after 5 s.
 - Progression: host drives, auto next mission, host level-select menu. No save/resume needed.
 - Difficulty scaling: optional bonus, low priority.
 - Language: French first; support any localized paks, or report why not.
-- Vehicle missions: try shared roles (driver/gunner, chosen in a menu), fallback spectator; ask owner per mission.
+- Vehicle missions: try shared roles (driver/gunner, chosen in a menu), fallback spectator; decide per mission.
 - Launch: in-game menu ideal, launcher .exe fallback; clear diagnostics of what failed.
 
 ## Log
 
 ### 2026-10-23 Phase 0-2: triage, workspace
 - Cloned coop-anything at 5b86e5b, branch `game/call-of-duty`. MCP tests: 13 OK (`python -m unittest tools/mcp/test_coop_mcp.py`; with `-I` the import fails, cosmetic).
-- Test install = hardlinked copy of the owner's install (configs copied for real).
+- Test install = hardlinked copy of the player's install (configs copied for real).
 - No CoD1/UO issue or PR in coop-anything (`gh issue list --search "call of duty"`: only MW 2019, MW3, MW2CR claims).
 
 ### 2026-10-23 Phase 1: research
@@ -91,7 +88,7 @@ hashes in "Game identity". Function names are mine, given from strings and Quake
 - `NET_AdrToString` 0x43f030: still formats `NA_LOOPBACK` (2), `NA_IP` (4) `%i.%i.%i.%i:%i` and IPX. `ntohs` is called through a pointer (`0x8cc71c`).
 - `Netchan_Transmit` 0x43ed50: max 0x4000 bytes, MAX_PACKETLEN 0x1f9b.
 - Client side is intact: `CL_ParseServerMessage`, `svc_gamestate`/`svc_snapshot`/`svc_serverCommand`, and "%s:sequenced packet without connection" in `CL_PacketEvent` 0x40dec0.
-- `CoDUOSP.exe`: entry point in `.text`, `.text` entropy 6.75 (CoDSP: 6.71). Code is not encrypted; `stxt774`/`stxt371` are inert SafeDisc leftovers in this repack.
+- `CoDUOSP.exe`: entry point in `.text`, `.text` entropy 6.75 (CoDSP: 6.71). Code is not encrypted; `stxt774`/`stxt371` are inert SafeDisc leftovers in this build.
 
 #### Observations: gamex86.dll (image base 0x20000000, exports `dllEntry`, `vmMain`)
 - `vmMain` 0x2001cd70, Q3 order: 2 = ClientConnect(n) 0x20014800, 3 = ClientBegin 0x200148d0 (clientNum in EAX, missed by the decompiler), 4 = ClientDisconnect 0x20014ca0, 5 = ClientCommand 0x20017ff0, 6 = ClientThink 0x200129c0, 7 = map/spawn init 0x2001ed30.
@@ -141,7 +138,7 @@ hashes in "Game identity". Function names are mine, given from strings and Quake
 
 ### 2026-10-24 Script (GSC) analysis, CoD1 campaign
 
-Method: Python scan of the `.gsc` files inside the owner's `main/*.pk3` (zip, read only), counting patterns per map
+Method: Python scan of the `.gsc` files inside the player's `main/*.pk3` (zip, read only), counting patterns per map
 (all `maps/<map>*.gsc` files). Counts only; no game script text is copied here. The line-level review of vehicle
 sequences was not done, so the vehicle classification below is coarse.
 
@@ -211,9 +208,9 @@ Shared library scripts with the most player refs: `_loadout` 160, `_load` 53, `_
 4. **Friendly AI following the player** (`setgoalentity(level.player)`, friendly chains): dawnville 26, brecourt
    13, chateau 11, pavlov 11. Keep the host as leader at first; later follow the nearest player.
 5. **Death and revive:** downed state plus revive as the target, respawn next to the teammate after 5 s as the
-   fallback (owner's choice). Both down = reload last checkpoint. Needs `_load`/`_autosave` changes plus a per-player health hook.
-6. **Vehicle missions:** spectator for player 2 first (owner's fallback). Then try shared roles where the vehicle
-   has a second seat or gun. Ask the owner per mission, as agreed: tankdrivecountry, tankdrivetown, railyard,
+   fallback (design choice). Both down = reload last checkpoint. Needs `_load`/`_autosave` changes plus a per-player health hook.
+6. **Vehicle missions:** spectator for player 2 first (the fallback). Then try shared roles where the vehicle
+   has a second seat or gun. Decide per mission: tankdrivecountry, tankdrivetown, railyard,
    carride, truckride, airfield, dam, ship, stalingrad crossing.
 7. **Effort order (smallest first) for a first playable run:** trainstation, sewer, factory, powcamp, rocket, chateau,
    then the large ones (dawnville, pavlov, stalingrad, pegasusnight).
