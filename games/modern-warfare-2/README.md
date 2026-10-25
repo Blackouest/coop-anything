@@ -4,9 +4,9 @@
 |---|---|
 | Engine | IW 4.0 (closed; id Tech 3 derived) |
 | Versions tested | Steam app 10180, build 25374375 (the 64-bit update of September 2026): `iw4sp.exe` x64, PE timestamp `0x6aaaa257`, SHA-256 `2F8C9CFDA1B8C0FB308FD9719577154E8222FC7654F5E8F1BF54579BCA69D805`, `version` dvar `IW4 2.0 build 14 Fri Oct 03 16:56:21 2025 win64`, Russian language set |
-| Projects | [mw2_coop](https://github.com/stxlvn/mw2_coop) (campaign co-op, beta, playable, MIT); COD-MOD 3.223 campaign co-op pack (32-bit, 2020, abandoned) |
-| QA level | automated (two game copies on one PC, in-game scripted checks of the reworked set pieces, a spawn and kit check on six levels, a bot tour of the start points of 17 of the 19 levels; the campaign has not been played through end to end) |
-| Last updated | 2026-10-22 |
+| Projects | [mw2_coop](https://github.com/stxlvn/mw2_coop) (campaign co-op, beta, MIT); COD-MOD 3.223 campaign co-op pack (32-bit, 2020, abandoned) |
+| QA level | automated (two game copies on one PC, in-game scripted checks of the reworked set pieces, a spawn and kit check on six levels, a bot tour of the start points of all 19 levels; the campaign has not been played through end to end) |
+| Last updated | 2026-10-25 |
 
 ## Where things stand
 
@@ -20,10 +20,10 @@ and snowmobiles, No Russian's elevator, cover and ending, the crash site and ISS
 Endgame's boat chase and the final knife fight. Enemies fight both players; both play the
 difficulty the host picks, with a lobby switch for friendly fire and checkpoints in every
 level. Bots toured the start points of all 19 levels on two copies (results in
-[NOTES.md](NOTES.md); the Museum epilogue still fails for player 2, see Known issues), two people
-played Cliffhanger through and into No Russian on two PCs over the internet, and every
-set piece of the campaign is reworked for two; nobody has played the whole campaign through
-together yet.
+[NOTES.md](NOTES.md); the Museum epilogue still fails for player 2, see Known issues). Two people
+have played parts of the story on two PCs over the internet, from the start up to and including
+No Russian (Cliffhanger through, then into No Russian); the missions after it were checked
+by bots only, and nobody has played the whole campaign through together yet.
 The older COD-MOD campaign co-op pack only runs on the 32-bit build that the 2026 update
 replaced, and players who tried it found it rough.
 
@@ -284,7 +284,8 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.5.0-bet
     notifies, velocity pushes); nobody has checked those set pieces with real input.
 - 2026-10-22, level tour (QA `tour`, god mode on): every start point of a level in turn, both
   players up, together, not stuck, a real-input walk, player 1 sent to the two nearest triggers,
-  frames from both screens. 17 of 19 levels, 179 sections; per-level results and what each FAIL
+  frames from both screens. All 19 levels, 192 sections (17 levels and 179 sections in the first run,
+  Whiskey Hotel and the Museum later that day); per-level results and what each FAIL
   was in [NOTES.md](NOTES.md). Run on the mod's main of that day, before v0.4.0-beta, not rerun
   on the release DLL.
 - 2026-10-22, v0.4.0-beta (god mode off where it matters): `god` (default on in QA, off without

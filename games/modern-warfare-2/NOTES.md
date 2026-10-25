@@ -1014,7 +1014,7 @@ frames host/client. dc_whitehouse (Whiskey Hotel) and ending (Museum) were toure
 
 ## Playtest 2026-10-23 (two PCs, Cliffhanger and No Russian)
 
-The owner and a friend played over the internet, each on his own PC and Steam account, with a
+Two people played over the internet, each on his own PC and Steam account, with a
 session recorder in the scripts (`maps\_mw2coop_rec.gsc`: positions every second, buttons,
 weapons, links, damage, downs and the allies, written to `mw2coop.log` through a `setdvar`
 the DLL catches). Both machines' logs matched line for line (no desync). Builds were sent
