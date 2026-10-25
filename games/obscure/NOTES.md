@@ -830,3 +830,8 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - 40 effect files compiled, no errors, ~280 fps.
 - **ANISO (mod):** device `SetSamplerState` (slot 69) turns `MINFILTER` LINEAR into ANISOTROPIC with `MAXANISOTROPY` = level. Settings `ANISO` / `OBSCOOP_ANISO` (0 or missing = off). Log "anisotropic filtering x16" seen; the visual difference was not compared.
 - **Package 1.3:** guest ini `SSAA=2`, `ANISO=16`; optional `graphics/` folder (ReShade + preset `ObscureCoop.ini`: SMAA, CAS 0.6, Vibrance 0.15). Host copy: ReShade installed, `start_host.bat` sets `OBSCOOP_ANISO=16`. Co-op not run on 1.3.
+- **MXAO made to work (2026-10-25, observed in a test copy with SSAA 2):**
+  - ReShade found no depth in this game, with SSAA 1 as well. With `[DEPTH] DepthCopyBeforeClears=1` it does: DisplayDepth shows correct normals, with SSAA 1 and 2.
+  - Defaults gave very thin AO (debug view). Settings that work: `RESHADE_DEPTH_LINEARIZATION_FAR_PLANE=10000.0`, `MXAO_SMOOTHNORMALS=1`, `MXAO_SAMPLE_RADIUS=8`, `MXAO_SSAO_AMOUNT=1.5`.
+  - Measured in the fountain area: 6.4% of pixels more than 30/765 darker than without MXAO (2.2% at defaults). Contact shadows at the fountain steps, under feet and in the basin (`local/runs/mxao_compare.png`). ~280 fps.
+  - Shipped on: host copy and the 1.3 package's `graphics/` (`ReShade.ini` and `ReShade2.ini` identical).
