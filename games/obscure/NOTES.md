@@ -850,3 +850,21 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Check (test copy, SSAA 2):** main and pause menu text at native-looking size, centred on the highlight bars, game responsive. In-game message boxes were not seen. Co-op not run.
 - **Package 1.4:** guest ini gains `TEXT_SCALE=` (empty = SSAA).
 - Package `local/package/obscoop-test-1.5.zip` (DLL SHA-256 `470ed6a2…`), host test copy updated. Tested on this DLL: visual checks only (test copy, windowed, SSAA 2): sharp font copies made for 4 font textures, pause menu text crisp at normal size; ANISO 0 vs 16 measured +4% detail on far ground; ReShade presets clean/horror compile and run ~280 fps; co-op not run.
+
+### Texture filtering check, sharper fonts, more ReShade presets (1.5, 2026-10-25)
+- **Sampler state (observed, logged):**
+  - The game sets `MINFILTER` LINEAR once per stage 0..2 at startup, and `MIPFILTER` NONE on stage 0 (type 7 = 0). So it always samples mip 0.
+  - A mip LOD bias changes nothing (`LODBIAS` 0 vs −1: same detail measure). The setting was removed.
+  - ANISO 0 vs 16 (`local/runs/sharp.py`, mean horizontal gradient): near ground 9.2 vs 9.2, far angled ground 9.5 vs 9.9 (+4%). Kept.
+- **Fonts:**
+  - The renderer batches 2D quads: no `SetTexture` during the glyph calls.
+  - Textures are created in pairs: system memory (pool 2, created from `0x5a814d`) and default pool (pool 0, from `0x5ab778`), with the copy between them through `UpdateTexture`.
+  - The only 512x128 A8R8G8B8 textures in a menu + level run (282 textures) were three pairs. They match the font table: `font_holstein16/24/30` 0x200x0x80; `font_lucida10` is 128x16 and `buttons_360` 256x256.
+  - Fix: device `UpdateTexture` (slot 31) builds a 1024x256 Lanczos-2 copy (premultiplied) of such textures, and `SetTexture` (slot 65) binds it instead. Active when `TEXT_SCALE` > 1.
+  - Check: 4 copies made in a menu + level run, pause menu text crisp at normal size.
+- **ReShade presets:**
+  - `ObscureCoop.ini`: MXAO, SMAA, Deband (qUINT), CAS, Vibrance.
+  - `ObscureCoop-Horror.ini`: adds Lightroom (contrast 0.12, temperature −0.15), FilmGrain 0.15, Vignette −0.45.
+  - SSR is listed but off: no material information, so every surface would reflect.
+  - Both run at ~280 fps in the test copy.
+- **Package 1.5.** Co-op not run on 1.2–1.5.
