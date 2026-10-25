@@ -6,7 +6,7 @@ Claim issue: https://github.com/cranebeaker/coop-anything/issues/183. Branch: `g
 The summary below is current. The dated sections after `## Sources` are the running log, with the evidence and sources.
 
 ## Start here (new session), updated 2026-10-25
-- **Current build:** 0.9 (`local/package/obscoop-test-0.9.zip`, also in `local/obscure-test`). Works per the owner's playtests: join over Steam, movement, attacks, enemies/kills, levels, doors (with animation), give, weapons and shared bag, inventory menu on the remote screen, pickup pictures and texts, death handling (no crash). Fixed in 0.9 but not confirmed by the owner yet: the host's camera staying on the host's player.
+- **Current build:** 1.0 packaged (`local/package/obscoop-test-1.0.zip`); 1.1 code built, not tested or packaged (smoothing, 60 Hz sends, door loop fix; protocol 2, so both players need 1.1). Owner: 1.0 "near perfect" functionally.
 - **Code:** `local/coopdll/src/` (`obscoop.c` includes `net.c`, `sync.c`; hooks and protocol are described in comments there and in the dated sections below).
 - **Tools:** `sh local/runs/suite.sh [test ...]` runs bot tests on two test copies (one line per test; refuses if the owner's game is running). `sh local/runs/release.sh <version> "<tested>"` builds, packages, installs in the host copy, appends to these notes, commits and pushes.
 - **Owner preferences:** build only unless asked to test; short replies; one playtest report with logs in `local/logs/`.
@@ -781,3 +781,21 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - **Observed:** after a load, player 2 is out of the party (the save holds one real player). The guest presses START and the host confirms, as at join. The test did that and P2 came back each round.
   - F1 itself is not bot-tested: the bot sends DirectInput keys and the copies run in the background. The same function ran through the death trigger.
 - Package `local/package/obscoop-test-1.0.zip` (DLL SHA-256 `7b49f046…`), host test copy updated. Tested on this DLL: load_test --menu 21/21 (death -> pause menu on host -> LOAD > 01 > YES -> guest reloads, twice) on the build before the title text change; full suite not run.
+
+### Owner playtest of 1.0 and smoothing (2026-10-25)
+- **Owner report:** loading "flawless". Once a player was invisible to the other in the corridor room right after a quick load and a door. The guest's character has micro-stutters when playing over the internet, not on one PC. Logs: `local/logs/2026-10-25_1.0_host.log`, `..._1.0_guest.log`.
+- **Guest log (observed):**
+  - RTT 62..78 ms, five readings of 500..516 ms.
+  - **41,509** lines "level change from a puppet's door state ignored" from 03:33:29 (first door → m100) to 03:35:44, about once per frame.
+  - Cause (code): the guest forced a door request every frame while the host's character was in state 50/52 and its own copy was not. After the copy's door state ended it requested a level change (swallowed), dropped out of 50/52, and was forced in again. That loop probably also caused the invisible character (**not verified**).
+- **Stutter (derived from code):**
+  - The guest snapped every character to the newest state packet, so movement stepped whenever packets came in bunches.
+  - The host's sends ran per frame. The game runs uncapped (owner's overlay about 275 fps), which meant roughly 600 packets/s over Steam (state, enemies and UI every 2 frames; view and messages every 4; items every 6).
+- **Changes (1.1, built, not tested):**
+  - Protocol version 2; state packets carry the host's send time (performance counter, ms).
+  - Host sends on a 60 Hz network tick: characters and enemies every tick, the rest at their old 60 fps rates.
+  - Guest keeps 32 snapshots and shows "host time − delay", blending position and facing between the two around it. It extrapolates up to 50 ms past the newest and snaps on jumps over 150 units (teleports). Delay = p90 of packet lateness over the last 128 packets + one send interval, 20..200 ms, drifting slowly. `OBSCOOP_SMOOTH_MS=<ms>` fixes it, `0` turns smoothing off. Logged every 30 s as "smooth: delay …".
+  - Door: forced only until the copy has entered the host's door state once per door use. The swallowed-level-change line is logged at most every 5 s, with the character id and a count.
+  - Enemies are not smoothed yet (still snap, now at 60 Hz).
+- **Graphics (observed):** the exe imports `d3d9.dll` (`Direct3DCreate9`), so it is a Direct3D 9 game.
+- Package `local/package/obscoop-test-1.1.zip` (DLL SHA-256 `0f339489…`), host test copy updated. Tested on this DLL: none (owner: no test needed; built clean, -Wall -Wextra).
