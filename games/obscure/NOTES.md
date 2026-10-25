@@ -745,3 +745,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - The CPlayerHuman::Update hook restores game `+8` if a puppet's Update set it to 5 (the door state's own level change); the guest keeps following the host's LEVEL packet only.
   - Run r7: P1 door failed the new check (the guest's copy only saw state 10): the one-frame request was lost. Fixed by requesting 50/52 again while the host's character is in that state and the copy isn't.
   - **Run r9:** `door_test.py` 7/7 (guest copy reached state 50; guest followed once) and `p2door_test.py` 9/9 (state 50 on the guest; 27 own level-change requests ignored, followed once). Other tests not rerun on this build yet.
+- **Package `local/package/obscoop-test-0.7.zip`** (DLL SHA-256 `14049e19…`), built on the owner's request without the full regression: only the door tests (r9) ran on this DLL; the other six were stopped before any finished. Host test copy has the same DLL.
