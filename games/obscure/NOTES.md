@@ -927,3 +927,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - **Flashlight:** not handled. It is an item (`TheFlashLight`, `flashlight*.zwo`, `TheFlashLightCone*`); it needs a spot light with direction and cone, probably the spot element (type 11). Not yet located in memory.
   - Remix's welcome dialog (data-sharing choice, ticked by default) is still shown in screenshots; not clicked or suppressed.
   - Not run: the bot suite on 1.9, co-op under Remix, frame rate over time.
+- Package `local/package/obscoop-test-1.10.zip` (DLL SHA-256 `2a046eeb…`), host test copy updated. Tested on this DLL: build; courtyard fallback light halved, indoor light scale 2.65 (+20%), spot lights converted (untested without a flashlight), texture hold off by default; single-copy Remix runs only (staircase, courtyard), bot suite not run; known open: wrong wall textures in C000 under Remix.
