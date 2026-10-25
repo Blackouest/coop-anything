@@ -5,19 +5,19 @@
 | Engine | Hydravision in-house (`.hvp` archives, `.zwo` models, `.hoe` scripts); not RenderWare |
 | Versions tested | Steam app 254460, build 215286, `Obscure.exe` SHA-256 `7107439eb6ee1b20cad32e87f7a10a3a95b71c0b5ee26b1ec9139b263577a0f2`, Windows 11 |
 | Projects | [obscure-coop](https://github.com/Gyurooo/obscure-coop) (MIT; proxy `xinput1_3.dll`, source and bot tests); directory entry "Obscure / obscure-coop" |
-| QA level | automated (bot tests with two real game copies on one PC), plus owner playtests over Steam |
+| QA level | automated for builds up to 1.0 (bot tests with two real game copies on one PC); builds 1.1 to 1.8 were not bot-tested, only checked by screenshots, measurements and playtests over Steam (see QA) |
 | Last updated | 2026-10-25 |
 
 ## Where things stand
 
-Two players on two PCs play the story together over Steam with build 1.7. The owner's playtests were
-"near perfect": joining, moving, fighting, doors, items, weapons, deaths and loading a save work.
+Two players on two PCs play the story together over Steam with build 1.8. Playtests over Steam
+reported joining, moving, fighting, doors, items, weapons, deaths and loading a save working.
 Over the internet, characters and enemies are smoothed. Optional graphics: in-game supersampling,
-16x filtering and a tuned ReShade setup.
+16x filtering, a tuned ReShade setup, and 16:9 widescreen (no side bars, wider view).
 
 ## Existing work
 
-- No online co-op mod was found before this one (search list in `NOTES.md`, Phase 1).
+- No online co-op mod was found before this one (search list in `NOTES.md`, section 2).
 - The game has 2-player **local** co-op on one screen: player 2 presses Start on a second controller.
 - Steam Remote Play Together and Parsec work by player reports (they stream the host's screen; the
   friend needs no copy of the game). Links in `NOTES.md`.
@@ -63,7 +63,7 @@ Source: [obscure-coop](https://github.com/Gyurooo/obscure-coop).
 - **Pause after a death:** a dead host is player 2 after the swap, and its START asks "Player 2
   quits the party". The host gets the pause menu instead, opened the way the main loop opens it,
   3 s after a death or with F1.
-- **Smoothing (owner report: micro-stutters over the internet):**
+- **Smoothing (playtest report: micro-stutters over the internet):**
   - Packets carry the host's send time, and the guest shows characters and enemies at host time
     minus an adaptive delay (p90 jitter + one send interval), blended between snapshots.
   - Sends run on a fixed 60 Hz tick; at about 275 fps the old per-frame rates meant about 600
@@ -79,6 +79,11 @@ Source: [obscure-coop](https://github.com/Gyurooo/obscure-coop).
   quads (renderer `+0xb8`/`+0xc0`) are scaled about the string's anchor.
 - **Filtering (`ANISO`):** `MINFILTER` LINEAR becomes ANISOTROPIC; about +4% detail on angled
   ground (measured).
+- **16:9 widescreen (`WIDESCREEN`, 1.8):** in fullscreen the game drew a pillarboxed 4:3 picture
+  (viewport 1920x1440 at x = 320 of 2560x1440). The renderer's keep-4:3 default (`mov [esi+0x298], 1` at
+  `0x5ac1db`) is cleared, and the camera's set-FOV function (`FUN_00590230`) is hooked to keep the 4:3
+  vertical view and widen the horizontal one, so the game's culling follows (no pop-in at the edges). The
+  main menu logo and background are stretched wide at 16:9.
 - **Watchdog:** if the main loop stops for 5 s, the log records where.
 
 Tried and dropped: a mip LOD bias (no effect: mip filter NONE), and 2x font textures (the swap keyed
@@ -89,7 +94,7 @@ by texture address hit a reused address and drew letters on the ground).
 Tests drive two real copies on one PC (host + guest over UDP) through a named pipe in the DLL
 (virtual pads, keys, test commands) and read both processes' memory; they assert on game state.
 Scripts: `tests/` in [obscure-coop](https://github.com/Gyurooo/obscure-coop); run with
-`sh tests/suite.sh`. Every run fingerprints the owner's real install and saves before and after.
+`sh tests/suite.sh`. Every run fingerprints the player's real install and saves before and after.
 
 Last results:
 
@@ -104,9 +109,10 @@ Last results:
 Earlier builds: mirroring, levels, enemies, items, combat, join, per-player inventory, view, message
 and attack tests, all recorded in `NOTES.md`.
 
-1.1 to 1.7 (smoothing, door loop, graphics, text size, enemy smoothing) were checked by screenshots
-and measurements in test copies, and by the owner's playtests over Steam. They were not run through
-the bot suite in co-op.
+**Builds 1.1 to 1.8 were not bot-tested in co-op.** 1.1 to 1.7 (smoothing, door loop, graphics, text size,
+enemy smoothing) were checked by screenshots and measurements in test copies and by playtests over Steam.
+1.8 (widescreen) was checked by back-buffer screenshots at fullscreen 2560x1440 and a playtest; `death` and
+`camera` passed on its first widescreen build only.
 
 ## How to play
 
