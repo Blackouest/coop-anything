@@ -799,3 +799,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Enemies are not smoothed yet (still snap, now at 60 Hz).
 - **Graphics (observed):** the exe imports `d3d9.dll` (`Direct3DCreate9`), so it is a Direct3D 9 game.
 - Package `local/package/obscoop-test-1.1.zip` (DLL SHA-256 `0f339489…`), host test copy updated. Tested on this DLL: none (owner: no test needed; built clean, -Wall -Wextra).
+- Package `local/package/obscoop-test-1.2.zip` (DLL SHA-256 `c677322a…`), host test copy updated. Tested on this DLL: none for co-op; supersampling checked visually in a windowed test copy (3D, HUD, pause menu fill the window, ~280 fps; menu text half size); fullscreen-to-borderless path not run.
