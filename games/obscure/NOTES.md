@@ -5,6 +5,14 @@ Claim issue: https://github.com/cranebeaker/coop-anything/issues/183. Branch: `g
 
 The summary below is current. The dated sections after `## Sources` are the running log, with the evidence and sources.
 
+## Start here (new session), updated 2026-10-25
+- **Current build:** 0.9 (`local/package/obscoop-test-0.9.zip`, also in `local/obscure-test`). Works per the owner's playtests: join over Steam, movement, attacks, enemies/kills, levels, doors (with animation), give, weapons and shared bag, inventory menu on the remote screen, pickup pictures and texts, death handling (no crash). Fixed in 0.9 but not confirmed by the owner yet: the host's camera staying on the host's player.
+- **Code:** `local/coopdll/src/` (`obscoop.c` includes `net.c`, `sync.c`; hooks and protocol are described in comments there and in the dated sections below).
+- **Tools:** `sh local/runs/suite.sh [test ...]` runs bot tests on two test copies (one line per test; refuses if the owner's game is running). `sh local/runs/release.sh <version> "<tested>"` builds, packages, installs in the host copy, appends to these notes, commits and pushes.
+- **Owner preferences:** build only unless asked to test; short replies; one playtest report with logs in `local/logs/`.
+- **Next task:** on-screen prompt to reload the last save when a player dies (open questions: either player's death or both; host-only trigger suggested). Hard part: the guest reloading automatically.
+- **Open:** readable documents' page text on the guest (untested); which input moved the host's camera (unknown); other object interactions (ladder, rack, lock) not mirrored yet; lag/loss test prepared (`chaos_run.sh`), not run.
+
 ## Game identity (AGENTS.md rule 5), recorded 2026-10-24
 - Title: Obscure (Hydravision Entertainment, 2004). Obscure II / The Aftermath (Steam app 254480) is a separate target, for later.
 - Store: Steam, app 254460, build id 215286. The exe says "Mighty Rocket Studio", FileVersion 1.0.1.0, PE timestamp 2014-03-18 (the Steam re-release).
