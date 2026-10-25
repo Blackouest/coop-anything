@@ -909,3 +909,21 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Shipped:** `rtx.conf` in `local/package/obscoop-test-1.8/` (zip rebuilt, README explains it). It is a stop-gap look, not Remix-native lighting: real lights would be placed in the Remix toolkit.
 - **Not tested:** other levels (indoor, dark-aura), frame rate cost, whether the light looks right in motion.
 - Package `local/package/obscoop-test-1.9.zip` (DLL SHA-256 `60ef3187…`), host test copy updated. Tested on this DLL: build; Remix with game lights tested in single copies (courtyard, B000, C000, D000: lights found and given to Remix, screenshots in local/runs); native copy not re-run through the bot suite for this build; known open: wrong wall/floor textures in C000 under Remix, flashlight not handled.
+
+### RTX Remix: the game's own lights (1.9, 2026-10-25)
+- **Owner request:** "extract from memory where the light sources are in game and give it to rtx remix". Feedback on 1.8: too bright and spotlight-like outdoors, staircase a little dark, wall texture turns blue, flashlight is important.
+- **Game lights (observed, memory scans of the running game):**
+  - The engine has `CLightingElementLightOmni` (vtable `0x64472c`, type `+4` = 10) and `CLightingElementLightSpot` (`0x644708`, type 11), plus `Ambient` (`0x644754`), `AmbientBox` (`0x644768`) and `DarkOmni` (`0x644740`). Found by RTTI; instances found by scanning the heap for the vtable pointers.
+  - Layout (omni): `+0x10` enabled, `+0x20/+0x24/+0x28` position, `+0x2c..+0x34` direction, `+0x38` colour ARGB, `+0x3c` range, `+0x44` index. `TM_LightCreate`/`TM_LightSetPosition`/`TM_LightEnable` (script natives) write these fields.
+  - The courtyard has no omni or spot lights, only ambient zones (levels are lit by baked vertex colours). Indoor levels do: B000 8 lights (range 400 to 890, warm), C000 6 (range 160 to 648, grey-blue), D000 2 to 4 at a time, B002 1, C004 1. Ids from the level table: A000=1, B000=17, C000=49, D000=65.
+  - The game submits no Direct3D lights at all (0 `SetLight` calls); it only sets `AMBIENT` (e.g. `ffc4ac84`) and uses fixed-function vertex colours.
+  - Game coordinates equal Direct3D world coordinates: character world matrices equal the characters' memory positions (`-63.1, 3930.9, 6.0`), so no conversion.
+- **Mod (1.9, `rxlights.c`):** a worker thread rescans the heap twice a second; each Present the still-valid enabled lights are given to Remix as legacy point lights (`SetLight` + `LightEnable`), which Remix converts to ray traced lights. Colour is scaled by `REMIX_LIGHT_SCALE` (default 2.2) and by up to 2x for small ranges (Remix ignores the range). Spot lights are treated as point lights for now.
+- **Results (screenshots in `local/runs`, compare page published as an artifact):**
+  - Staircase B000: real shadows from the game's lights, warm and bright. Hall C000: lit, but see the texture bug.
+  - Courtyard: the camera-attached sphere light (1.8) looked like a spotlight; replaced by a soft distant fallback light (mode 1, direction `-0.3,-0.2,-1`, angle 25, radiance `5,5.2,6`), used only when no game lights exist.
+- **Open (not fixed):**
+  - **Wrong textures in C000 under Remix:** walls, floor and lockers show one blue swirl texture while doors and props are right (the original game shows teal lockers and tiles). `rtx.recomputeTextureHashOnWrite = True` did not fix it. A texture profile in the original game showed A8R8G8B8 and R5G6B5 textures with 8 mip levels, a 1x1 texture bound for about 250 draws per frame, and system-memory-pool textures bound for drawing. Unverified idea: native Direct3D 9 rejects binding a system-memory texture while Remix does not. A probe that checked this crashed the game (it called methods on freed texture pointers), so it is not done.
+  - **Flashlight:** not handled. It is an item (`TheFlashLight`, `flashlight*.zwo`, `TheFlashLightCone*`); it needs a spot light with direction and cone, probably the spot element (type 11). Not yet located in memory.
+  - Remix's welcome dialog (data-sharing choice, ticked by default) is still shown in screenshots; not clicked or suppressed.
+  - Not run: the bot suite on 1.9, co-op under Remix, frame rate over time.
