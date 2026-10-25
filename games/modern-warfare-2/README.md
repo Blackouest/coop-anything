@@ -210,7 +210,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.5.0-bet
   build: the triggers are now picked by class); Team Player's seat swap by either player; a Password row in the
   lobby. The Russian game gets Tektur and Fira Sans Condensed instead of one generic font. The host's packets are
   accepted only from the partner, the QA command file only if present at start, the log rotates at 5 MB.
-  A 32-bit build exists in the source (not in the archive).
+  A 32-bit build for the older game ships as a separate experimental archive (`mw2coop-v0.5.0-beta-x86.zip`).
 - S.S.D.D.: both start inside the range's sandbag bay, where COD-MOD puts its two players (v0.3.0-alpha put
   player 1 inside the bay's back wall, where he could not walk); each takes his own rifle and pistol off the
   table (another lies there until both have one; holders near it keep full ammo so they cannot
@@ -330,5 +330,5 @@ the list, by address or by Steam invite.
 
 - The Museum epilogue for player 2.
 - Play the campaign through together end to end, and the new scenes with two people.
-- Enemy scaling for two players; finish the 32-bit build (source only for now), split screen.
+- Enemy scaling for two players; finish the 32-bit build (an experimental archive now), split screen.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.

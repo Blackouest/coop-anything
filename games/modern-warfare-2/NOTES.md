@@ -1040,7 +1040,9 @@ loopback, so the lobby heartbeat never reaches the socket); players on two PCs a
 Release `v0.5.0-beta` of mw2_coop (tag on main 8e4f31c, docs 83c6cbd): zip SHA-256
 `661359ebba9e8ee4a9f4d62f2a9a533a00afa341178a72dca848d1897051c4e6`, release `winmm.dll` SHA-256
 `12176eeea7bf517c1901812e2f996a3dbc4175ac794c1806bc918a671d4c13fd`, built from a fresh clone of GitHub `main`.
-Release DLL checked on two test copies: `spawn` on the range and the Gulag rope (`rappel`): PASS on both, the fonts load.
+Release DLL checked on two test copies: `spawn` on the range and the Gulag rope (`rappel`): PASS on both, the fonts load. The experimental
+32-bit archive `mw2coop-v0.5.0-beta-x86.zip` (SHA-256 `146d14513c1944b21a4ac3e4c473de0801c191d87d50f6209ad37e4a69b073bf`, its DLL
+`836f09112cf33694...`): `spawn` PASS on two 32-bit copies.
 
 Observations (what ran; all by bots on two copies on one PC, nobody played these with two people):
 - Scenes for both: QA `rappel` (Gulag cellblock rope: both on the rope, both 479 units down, let go, weapons in
@@ -1069,5 +1071,5 @@ rope scene.
 ## Status
 
 Done in v0.5.0-beta: the rope and rappel scenes for two, S.S.D.D.'s gates, Team Player's swap, Cliffhanger's
-snowmobile and climb views, Russian fonts, a 32-bit build in the source. Next: a real two-person playthrough of the new
+snowmobile and climb views, Russian fonts, an experimental 32-bit archive. Next: a real two-person playthrough of the new
 scenes, lip sync (off on both screens), the nrend anim_loop error, the Museum for player 2, split screen.
