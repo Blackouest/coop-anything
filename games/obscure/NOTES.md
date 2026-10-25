@@ -169,6 +169,18 @@ the only place `+8 = 3` is written. `video_cfg.dat` is read and written through 
   and facing, extrapolating up to 50 ms and snapping on jumps over 150 units. Enemies use the same buffer.
 - **Per-player inventory:** the host creates the missing items section for player 2 each frame (game allocator
   `0x5e3fda`, ctor `FUN_00512890`) and patches the hand-back on close (`75 19` to `EB 19` at `0x41fb1f`).
+- **Movement frame of the guest's player:** `FUN_0044c2b0` (real player update) turns the stick into a world direction
+  relative to a forward vector: a locked reference (real player `+0xa8/+0xac/+0xb0`, valid while `+0xa0` is 1 and
+  the stick stays close to the direction it was captured with, `+0xb4/+0xb8`) or the level's current camera
+  (`*(*(game+0x514)+0x54)`, axis at `+0x40/+0x44/+0x48`). The references are copied from camera objects by
+  `FUN_0040bf10` and `FUN_0040c9f0` (zone triggers, view changes). On the host these are the host's cameras, so the
+  friend's stick moved him in the host's frame while his own screen showed another camera angle (playtest report).
+  The guest sends the camera axis of its own level camera (packet 19, about 20 per second); on the host a hook on
+  `FUN_0044c2b0` (entry `55 8b ec 8b 45 08`, trampoline) swaps that axis into the camera and the locked reference for
+  the duration of the guest's real player update only and restores both after the call. Measured: with the guest
+  sending a chosen axis, player 2 walked at headings 81.6, 8.6, -81.5 and -179.5 degrees for axes +y, +x, -y, -x
+  (`tests/moveref_test.py`, 4/4). Camera yaw from the view matrix showed fixed angles of 0 and 90 degrees in the
+  hall level (C000) and a single 90 degree angle in the courtyard. Not tested: two real camera zones at once.
 - **Deaths:** the host follows the real-player object that joined as player 2 (it keeps its controller through the
   swap) rather than the slot; the guest never switches onto a dead character (access violation at `0x44ba63`,
   null body, otherwise). A dead host is player 2 after the swap and its START asks "Player 2 quits the party", so
@@ -251,6 +263,12 @@ pictures and messages on the guest (fixed) and micro-stutter over the internet (
     4:3) is replaced by a hook that keeps the 4:3 vertical view and sets the horizontal angle from the real aspect.
     Scaling the projection matrix instead showed pop-in at the edges because the game culls with its own camera
     values; the camera hook fixes that.
+  - The set-FOV hook must be idempotent. Camera views set their angles from the level's data (horizontal angle is the
+    base, the vertical one is derived from the aspect), and the game also feeds a camera's current angle back in when
+    views change (the vertical angle is recomputed, so only the horizontal one matches a stored value). Widening that
+    again made the view grow by 0.75 x aspect on every camera change (logged: base 0.6 gave 0.7824, then 1.0056 on the
+    next set). The hook now remembers the horizontal angles it produced and passes matching ones through; a base
+    value always gives the same result (0.6 -> 0.7824, 0.7854 -> 1.0092, 1.1427 -> 1.4173).
   - Checked by back-buffer dumps at fullscreen 2560x1440 (courtyard, staircase, hall, menu). Open: the main menu
     logo and background are stretched wide; videos and inventory screens were not checked at 16:9.
 
