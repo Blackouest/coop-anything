@@ -10,12 +10,12 @@
 
 ## Where things stand
 
-**Beta, playable (v0.4.7-beta,** also on [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)**).** On the current 64-bit Steam build, two players play the
+**Beta, playable (v0.5.0-beta,** also on [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)**).** On the current 64-bit Steam build, two players play the
 campaign together through the game's own Spec Ops co-op netcode, hosted and joined from the
-game's menus (lobby, list of games on the network, address; Steam invite between two accounts
-untested). Reworked for two
+game's menus (lobby, list of games on the network, address, Steam invite). Reworked for two
 players: S.S.D.D. (each takes his own weapons), Team Player's convoy, the Humvees of
-Wolverines!, Takedown's car, The Only Easy Day's swim and stealth kill, Cliffhanger's ice climb
+Wolverines!, the rope and rappel scenes (the Gulag's cellblock rope and evacuation, Just Like Old Times' opening
+rappel, Escape from Favela's big jump and chopper ladder), the Only Easy Day's escape little bird, Takedown's car, The Only Easy Day's swim and stealth kill, Cliffhanger's ice climb
 and snowmobiles, No Russian's elevator, cover and ending, the crash site and ISS of Second Sun,
 Endgame's boat chase and the final knife fight. Enemies fight both players; both play the
 difficulty the host picks, with a lobby switch for friendly fire and checkpoints in every
@@ -48,7 +48,7 @@ replaced, and players who tried it found it rough.
   ([install guide](https://forum.alterware.dev/t/iw4x-singleplayer-install-guide/383)).
 - **IW4x** ([iw4x/iw4x-client](https://github.com/iw4x/iw4x-client)): open-source multiplayer
   client, not the campaign.
-- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.4.7-beta, [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)):
+- **mw2_coop** ([stxlvn/mw2_coop](https://github.com/stxlvn/mw2_coop), MIT, v0.5.0-beta, [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)):
   this project, for the 64-bit build.
 
 ## How the game works (for co-op)
@@ -113,7 +113,7 @@ replaced, and players who tried it found it rough.
 
 ## What we changed
 
-All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.7-beta of 2026-10-23; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
+All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.5.0-beta of 2026-10-25; since v0.3.0-alpha an install archive with `winmm.dll` and the `mw2coop` folder, hosting and joining in the game's menus, no `.bat` launchers):
 - `winmm.dll` proxy that checks the build, runs console commands from a file, watches dvars
   and memory, logs co-op packets and script runtime errors.
 - Script loader replacement (`Scr_AddSourceBuffer`): own scripts plus load-time patches of the
@@ -198,6 +198,19 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.7-bet
   there (it waited for player 2 to get off his snowmobile, which nobody does); 250 health on the
   snowmobiles. A session recorder writes both players' positions, buttons, weapons, damage and
   the allies to `mw2coop.log`.
+- v0.5.0-beta (see NOTES.md "v0.5.0-beta (2026-10-25)"): the scenes that were scripted for the level's player
+  alone now play for two: the Gulag's cellblock rope (both rappel in turn) and the evacuation rope to the Pavelow
+  (each clips on with his own use key), Just Like Old Times' opening rappel (whoever hooks up first rappels and
+  kills the guard, the other rappels after him), Escape from Favela's big jump over the gap and the chopper's rope
+  ladder (the first to leap starts it, the other catches the same rope), the escape little bird of The Only Easy Day.
+  The playtest's reports: Cliffhanger's stealth for both, the snowmobile seen whole by the partner and the rider
+  in his own body (the co-op body's mesh on Soap's skeleton, so the level's AI driving animation fits; the DLL
+  makes that model in memory), the partner seeing the climber's body instead of four arms, upright ice picks in
+  both hands; S.S.D.D.'s gates close once both are through (`GetEntArray` by `script_flag` finds nothing in this
+  build: the triggers are now picked by class); Team Player's seat swap by either player; a Password row in the
+  lobby. The Russian game gets Tektur and Fira Sans Condensed instead of one generic font. The host's packets are
+  accepted only from the partner, the QA command file only if present at start, the log rotates at 5 MB.
+  A 32-bit build exists in the source (not in the archive).
 - S.S.D.D.: both start inside the range's sandbag bay, where COD-MOD puts its two players (v0.3.0-alpha put
   player 1 inside the bay's back wall, where he could not walk); each takes his own rifle and pistol off the
   table (another lies there until both have one; holders near it keep full ammo so they cannot
@@ -290,7 +303,7 @@ All in [mw2_coop](https://github.com/stxlvn/mw2_coop) (latest release v0.4.7-bet
 ## How to play
 
 Beta: see the mw2_coop README. Both players copy `winmm.dll` and the `mw2coop` folder from the
-[v0.4.7-beta release](https://github.com/stxlvn/mw2_coop/releases) archive (or from [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)) into the game folder; the host picks Campaign -> co-op, the partner joins from
+[v0.5.0-beta release](https://github.com/stxlvn/mw2_coop/releases) archive (or from [Nexus Mods](https://www.nexusmods.com/codmw2/mods/99)) into the game folder; the host picks Campaign -> co-op, the partner joins from
 the list, by address or by Steam invite.
 
 ## Known issues
@@ -299,9 +312,9 @@ the list, by address or by Steam invite.
 - Checkpoints: a restart from one was tested by bots in Team Player and S.S.D.D. and played in
   Cliffhanger and No Russian; in the other levels bots only checked that each checkpoint's flag
   exists, not when a full run sets it.
-- Reported in the playtest, not fixed yet: in S.S.D.D. the door can close with player 2 still on
-  the course; in Team Player only one of the two can swap seats.
-- The level-ending fix (endings after a checkpoint restart) has not been played yet.
+- The scenes added in v0.5.0-beta (ropes and rappels, the chopper ladder, the Cliffhanger snowmobile and climb
+  views, S.S.D.D.'s gates, Team Player's swap) were checked by bots on two copies only; no two people have played
+  them. The level-ending fix (endings after a checkpoint restart) has not been played yet either.
 - Museum (the epilogue, map `ending`): in the bot tour player 2 cannot walk or ends up far from
   player 1 at the exhibit start points (9 FAIL); not fixed. Its civilians also flood the log
   with `_anim::anim_weight` errors and some stand in a T-pose, in single player too (checked
@@ -309,12 +322,12 @@ the list, by address or by Steam invite.
 - No Russian's far ending (nobody at the van door) logs one script error (`AnimScripted` refuses
   the van's driver); the scene plays on.
 - Loose Ends start point `forest_fight` logs two script errors from the level's own start code.
-- Joining through a Steam invite with two accounts is untested.
+- A mouse click on the ice climb sometimes needed repeating; one likely cause is fixed in v0.5.0-beta (a swing
+  clicked during the last one counted for nothing), not confirmed by a test: report if it still happens.
 
 ## Next steps
 
 - The Museum epilogue for player 2.
-- S.S.D.D.'s door and Team Player's seat swap from the playtest.
-- Play the campaign through together end to end.
-- Enemy scaling for two players; later, support the 32-bit build.
+- Play the campaign through together end to end, and the new scenes with two people.
+- Enemy scaling for two players; finish the 32-bit build (source only for now), split screen.
 - Check whether MW3 (2011) `iw5sp.exe` carries the same co-op netcode.

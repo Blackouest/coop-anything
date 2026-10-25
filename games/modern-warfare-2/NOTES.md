@@ -1035,9 +1035,39 @@ Cliffhanger was finished; No Russian's ending fix was not played yet. The 12 s l
 earlier in QA was a two-copies-on-one-PC artifact (joining `127.0.0.1` makes member addresses
 loopback, so the lobby heartbeat never reaches the socket); players on two PCs are not affected.
 
+## v0.5.0-beta (2026-10-25)
+
+Release `v0.5.0-beta` of mw2_coop (tag on main 8e4f31c, docs 83c6cbd): zip SHA-256
+`661359ebba9e8ee4a9f4d62f2a9a533a00afa341178a72dca848d1897051c4e6`, release `winmm.dll` SHA-256
+`12176eeea7bf517c1901812e2f996a3dbc4175ac794c1806bc918a671d4c13fd`, built from a fresh clone of GitHub `main`.
+Release DLL checked on two test copies: `spawn` on the range and the Gulag rope (`rappel`): PASS on both, the fonts load.
+
+Observations (what ran; all by bots on two copies on one PC, nobody played these with two people):
+- Scenes for both: QA `rappel` (Gulag cellblock rope: both on the rope, both 479 units down, let go, weapons in
+  hand), `rappel` on af_caves, `gulagevac`, `chopperjump`, `bigjump`, `oilbird`, `invconvoy`: PASS.
+- Cliffhanger: `snow`, `snowview` (frames of the rider, the partner's view of the snowmobile), `climbview` (frames of
+  the climber and the ice picks), `climb` (both reach the top; Soap catches both; four runs failed at the bot's
+  run-up to the big jump while one passed with the new picks: a flaky QA step, not proven).
+- S.S.D.D. `course` (gates close after both are through), Team Player `seatview` (the passenger looks ahead, no
+  friendly damage on the ride): PASS.
+
+Things we learned (worth knowing for other games on this engine):
+- `GetEntArray( value, "script_flag" )` returns undefined in this build: pick triggers by class and compare the field.
+- A player body (multiplayer skeleton) cannot play the campaign AI animations (a snowmobile driver twists across the
+  seat): make a model with an AI skeleton wearing the player's mesh. The DLL copies the AI model into the XModel
+  pool and puts the co-op body's surfaces on it (the same transplant as No Russian's crew), and answers the lookup
+  of a made-up model name; `DB_IsXAssetDefault` must say "not default" for that name or a reader count leaks and
+  the next `playsound` hangs.
+- Attach takes no angles: an upright ice pick in a fist needs a model whose bone is turned in memory.
+- Debugging a hang: a thread of the DLL that writes every other thread's return addresses to a file on request
+  (a file `dumpstacks` in the mod folder gives `stacks.txt`), taking no lock the game may hold.
+
+Unverified: the click fix for the ice climb (a guess; its own commit, revert with `git revert`), the second
+player's stealth in Cliffhanger (no frame), slide_sync in Escape from Favela, the other player's view of every
+rope scene.
+
 ## Status
 
-Done in v0.4.7-beta: saves per playthrough, checkpoint spots and regrouping, level endings after a
-checkpoint, Cliffhanger for two from the playtest. Next: S.S.D.D.'s door and Team Player's seat swap
-(playtest reports), lip sync (off on both screens), the nrend anim_loop error, the Museum for
-player 2.
+Done in v0.5.0-beta: the rope and rappel scenes for two, S.S.D.D.'s gates, Team Player's swap, Cliffhanger's
+snowmobile and climb views, Russian fonts, a 32-bit build in the source. Next: a real two-person playthrough of the new
+scenes, lip sync (off on both screens), the nrend anim_loop error, the Museum for player 2, split screen.
