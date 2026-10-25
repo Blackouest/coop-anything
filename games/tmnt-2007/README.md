@@ -8,14 +8,14 @@
 | Engine | Ubisoft Jade ("Engine v428-42" in the game's log; gameplay scripts compiled into the exe) |
 | Versions tested | Retail PC, `TMNTGame.exe` 1.0.0.188 (UPX-packed, SecuROM traces), SHA-256 `701d9f00f8c1edf790466f2ecfeb72a64fe7ccdc491f7c370ae11c1942740589`; store/edition unknown |
 | Projects | Local couch co-op by DLL injection (private, in progress; no public repo yet) |
-| QA level | community-reports (owner playtests only; no automated suite yet) |
-| Last updated | 2026-10-23 |
+| QA level | none (no structured or automated testing yet) |
+| Last updated | 2026-10-25 |
 
 ## Where things stand
 
 A second player can play a second turtle on screen at the same time as player 1, in one game process on one PC with
-two controllers. Movement, jump, both attacks, health, enemy targeting, respawn and a shared midpoint camera work in
-owner playtests. Player 2 does not yet have full move parity (double jump, combos, dodge, moves that need a run-up),
+two controllers. Movement, jump, both attacks, health, enemy targeting, respawn and a shared midpoint camera were seen
+working in manual runs during development, not in a structured test. Player 2 does not yet have full move parity (double jump, combos, dodge, moves that need a run-up),
 and team moves are switched off while player 2 is present. Not released.
 
 ## Existing work
@@ -58,7 +58,7 @@ files are modified.
 
 ## QA
 
-No automated suite yet. Results above are owner playtests. Next step is a pad-2 input script and a log that compares
+No automated suite yet. The results above come from manual runs during development, not a test. Next step is a pad-2 input script and a log that compares
 player 1's and player 2's move states for the same input (see the playbook's automated QA page and the Two Towers
 write-up).
 

@@ -48,4 +48,4 @@ has SecuROM traces; the game exes carry a RUNASADMIN compatibility flag, so memo
 
 ## Checks that actually ran
 
-Owner playtests of each mod build (2026-10-12 to 2026-10-14) and mod logs. No bot or scripted test yet.
+Manual runs of each mod build during development (2026-10-12 to 2026-10-14) and mod logs. No bot or scripted test yet.
