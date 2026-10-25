@@ -308,7 +308,7 @@ Everything below comes from the exe file and the archives in the test copy. Noth
 What ran (observed):
 - **Setup:**
   - The test copy has a proxy `xinput1_3.dll` (own code, built with llvm-mingw 20261020, i686; the code lives in `local/` until it gets its own repo), plus `steam_appid.txt` = 254460.
-  - The test copy's `video_cfg.dat` was set to `NVIDIA GeForce RTX 5090 [TnL HAL] - Windowed\0`. That is the windowed form built by `FUN_005ac610` (`<adapter> [TnL HAL] - Windowed`).
+  - The test copy's `video_cfg.dat` was set to `<adapter name> [TnL HAL] - Windowed\0`. That is the windowed form built by `FUN_005ac610` (`<adapter> [TnL HAL] - Windowed`).
   - The game was started with env `SteamAppId`/`SteamGameId` = 254460, with Steam running.
 - **Result:**
   - The process ran from the test folder; there was **no relaunch through Steam** and no second `Obscure.exe`.
@@ -560,7 +560,7 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Settings can come from `obscoop.ini` next to the exe (`[obscoop]`, keys without `OBSCOOP_`); environment variables win.
 - **Observed on the owner's PC (one Steam account):**
   - Run 32: the UDP regression after the rewrite passes, `mirror_test.py` 8/8.
-  - Run 33: on Steam, host and guest both initialised ("own id valid", persona name readable, a friend count of 55, callback registered without error). The guest was told to call its own account (`HOST_STEAMID=self`, test only). Its HELLO went through `SendP2PPacket` and was read by `ReadP2PPacket` with the right sender id: the host accepted it, 0 bad packets. With one account, whichever process polls first reads all packets (host rx 2171, guest rx 0). So **send/read and sender decoding are confirmed; two-way traffic needs two accounts.**
+  - Run 33: on Steam, host and guest both initialised ("own id valid", persona name readable, a plausible friend count, callback registered without error). The guest was told to call its own account (`HOST_STEAMID=self`, test only). Its HELLO went through `SendP2PPacket` and was read by `ReadP2PPacket` with the right sender id: the host accepted it, 0 bad packets. With one account, whichever process polls first reads all packets (host rx 2171, guest rx 0). So **send/read and sender decoding are confirmed; two-way traffic needs two accounts.**
   - Runs 34 and 35: friends scan in scan-only mode (`OBSCOOP_SCAN_ONLY=1`, contacts nobody): "4 of 55 friends in a game, 0 in Obscure". `GetFriendByIndex`/`GetFriendGamePlayed` return plausible, selective results.
   - Run 36: a guest configured only by `obscoop.ini` linked to a UDP host.
   - Run 37: `start_host.bat` (sets `SteamAppId`, `OBSCOOP_ROLE=host`, `OBSCOOP_NET=steam`) starts the test copy as a Steam host ("steam: ready"). Owner files unchanged.
@@ -802,7 +802,7 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - Package `local/package/obscoop-test-1.2.zip` (DLL SHA-256 `c677322a…`), host test copy updated. Tested on this DLL: none for co-op; supersampling checked visually in a windowed test copy (3D, HUD, pause menu fill the window, ~280 fps; menu text half size); fullscreen-to-borderless path not run.
 
 ### In-game supersampling (1.2, 2026-10-25)
-- **Owner's PC (observed):** NVIDIA GeForce RTX 5090, desktop 2560x1440 @ 279 Hz.
+- **Test PC:** a current NVIDIA card, 1440p desktop (details kept in `local/`).
 - **Owner asked** for a higher internal render resolution inside the game, as an optional setting.
 - **How (`coopdll/src/render.c`):**
   - Hooks `d3d9.dll!Direct3DCreate9` → `IDirect3D9::CreateDevice` (slot 16) → device `Reset`/`Present` (slots 16/17).
