@@ -869,3 +869,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Both run at ~280 fps in the test copy.
 - **Package 1.5.** Co-op not run on 1.2–1.5.
 - Package `local/package/obscoop-test-1.6.zip` (DLL SHA-256 `2f8a52ce…`), host test copy updated. Tested on this DLL: build only: 1.5 minus the font texture swap (reverted on owner request; likely cause of letters under a character: swap keyed by a freed and reused texture address).
+- **Owner report on 1.5:** "there is text under the red clothed character next to the fountain". Not reproduced in a test copy (SSAA 2 and 1, courtyard from the save). Likely cause (derived): the font swap was keyed by the D3D texture address. After the game frees a font texture (level load) and the address is reused, `SetTexture` kept binding the font copy, e.g. on a decal under a character. **Reverted in 1.6 on owner request**; the 1.4 text sizing stays.
