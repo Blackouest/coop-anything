@@ -7762,6 +7762,17 @@
 - game: Call of Duty
   year: 2003
   engine: IW 1.0 (Call of Duty, id Tech 3 derived)
+  project: (none found)
+  url: ''
+  other_urls: []
+  kind: gap
+  status: none
+  coop_scope: {}
+  players: unknown
+  networking: unknown
+  open_source: unknown
+  last_activity: unknown
+  qa: none
   notes: No campaign co-op mod found. A 2025 Steam reply names a "CoD 1 Cooperative Mod" with no link or author;
     no build was found. The ModDB "Call of Duty 1 Splitscreen PC v1.1" file is a 318-byte multiplayer splitscreen
     launcher, not campaign co-op. Research and reverse-engineering notes for the 1.5 singleplayer exe (4 server client
