@@ -198,8 +198,24 @@ the only place `+8 = 3` is written. `video_cfg.dat` is read and written through 
   `tests/props_test.py`, 6/6): same list on both copies, a prop moved by the host's setter follows, a caster shoved
   225 to 324 units by a character in contact (teleported next to it) is within 2 units on the guest. Not tested:
   pushing by walking (the keyboard input did not move player 1 right after a level change in that setup). Not synced:
-  closet doors (`CNoeClosetDoor`), breakables (`CNoeBreakable*`, `CEntityBreakableItem`), `CItPushable`/`CItMobile*`
-  items (none found in the levels scanned).
+  closet doors (`CNoeClosetDoor`), `CItPushable`/`CItMobile*` items (none found in the levels scanned).
+- **Breakables (1.11):** two kinds, both synced as "which ones are broken", the flying pieces are not.
+  - Items of the level manager's list (`+0x30`): `CItBreakable` (vtable `0x64dc14`), `...DoorWindow` (`0x64dcf4`),
+    `...Wall` (`0x64dde4`), `...Wall2` (`0x64de54`), `...Window` (`0x64e02c`). `+0x2c` is 1 once broken, `+0x30`
+    counts the break animation to 1000; vtable slot `0x60` breaks with sound and effects (what `TM_EventBreakIt`
+    calls), `0x64` at once. They ride in the items packet (kind 3); the guest calls slot `0x60`, or `0x64` when the
+    host's animation is over. Test `tests/break_test.py` (level 71, 5 windows): 4/4.
+  - Scene objects (windows in walls, vending machines = `distrib_PT`, which release item type `0xab`): a
+    `CNoeBreakableGroup` (vtable `0x65307c`) holds members tagged at `+0x30` (`0xe` unbroken, `0xf` broken, `0x11`
+    effects, `0x10` unbreakable); its broken flag is at `+0x7c` and `FUN_0052a820` (this = group) sets it and
+    switches the members over. The unbroken member (`CNoeBreakableUnbroken`, `0x653114`) keeps the group at
+    `+0x2f4`; the Toe world's list (`+0x588`, `+0xc`) points to it at `+4`. The game's own entity serializer
+    (slots 3 and 4 of that member) sends the same flag as byte 6 plus a name hash. The host sends the broken indices
+    (index among the unbroken members, packet 21, about every 2 s and on change); the guest calls `FUN_0052a820`.
+    Test `tests/sbreak_test.py`: level 17 (8 members, two start broken, three have no group) and level 49 (10
+    members): same state on both copies, one broken on the host is broken on the guest, the rest unchanged; 3/3
+    each. The drink is an ordinary item, so the item sync should carry it (not checked). Breaks were triggered
+    with a test command, not by shooting a window.
 - **Deaths:** the host follows the real-player object that joined as player 2 (it keeps its controller through the
   swap) rather than the slot; the guest never switches onto a dead character (access violation at `0x44ba63`,
   null body, otherwise). A dead host is player 2 after the swap and its START asks "Player 2 quits the party", so

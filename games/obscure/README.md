@@ -10,7 +10,7 @@
 
 ## Where things stand
 
-Two players on two PCs play the story together over Steam with build 1.8. Playtests over Steam
+Two players on two PCs play the story together over Steam with build 1.11. Playtests over Steam
 reported joining, moving, fighting, doors, items, weapons, deaths and loading a save working.
 Over the internet, characters and enemies are smoothed. Optional graphics: in-game supersampling,
 16x filtering, a tuned ReShade setup, and 16:9 widescreen (no side bars, wider view).
@@ -84,6 +84,9 @@ Source: [obscure-coop](https://github.com/Gyurooo/obscure-coop).
   `0x5ac1db`) is cleared, and the camera's set-FOV function (`FUN_00590230`) is hooked to keep the 4:3
   vertical view and widen the horizontal one, so the game's culling follows (no pop-in at the edges). The
   main menu logo and background are stretched wide at 16:9.
+- **Movable objects (1.10)** and **breakable windows and vending machines (1.11):** the host's physics decides the
+  position of chairs, wheeled objects and basketballs; the host sends which windows and machines are broken and the
+  friend's game runs the same break function (flying pieces are not synced). Tests in `tests/`.
 - **Watchdog:** if the main loop stops for 5 s, the log records where.
 
 Tried and dropped: a mip LOD bias (no effect: mip filter NONE), and 2x font textures (the swap keyed
@@ -109,14 +112,14 @@ Last results:
 Earlier builds: mirroring, levels, enemies, items, combat, join, per-player inventory, view, message
 and attack tests, all recorded in `NOTES.md`.
 
-**Builds 1.1 to 1.8 were not bot-tested in co-op.** 1.1 to 1.7 (smoothing, door loop, graphics, text size,
+**Builds 1.1 to 1.8 were not bot-tested in co-op;** 1.10 and 1.11 added `props`, `break` and `sbreak` tests. 1.1 to 1.7 (smoothing, door loop, graphics, text size,
 enemy smoothing) were checked by screenshots and measurements in test copies and by playtests over Steam.
 1.8 (widescreen) was checked by back-buffer screenshots at fullscreen 2560x1440 and a playtest; `death` and
 `camera` passed on its first widescreen build only.
 
 ## How to play
 
-Windows download: [obscure-coop 1.8](https://github.com/Gyurooo/obscure-coop/releases/tag/v1.8). See the
+Windows download: [obscure-coop 1.11](https://github.com/Gyurooo/obscure-coop/releases/tag/v1.11). See the
 [obscure-coop README](https://github.com/Gyurooo/obscure-coop#play). In short:
 
 - **Friend:** drops `xinput1_3.dll` and `obscoop.ini` next to `Obscure.exe` and starts the game from
