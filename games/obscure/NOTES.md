@@ -6,7 +6,7 @@ Claim issue: https://github.com/cranebeaker/coop-anything/issues/183. Branch: `g
 The summary below is current. The dated sections after `## Sources` are the running log, with the evidence and sources.
 
 ## Start here (new session), updated 2026-10-25
-- **Current build:** 1.0 packaged (`local/package/obscoop-test-1.0.zip`); 1.1 code built, not tested or packaged (smoothing, 60 Hz sends, door loop fix; protocol 2, so both players need 1.1). Owner: 1.0 "near perfect" functionally.
+- **Current build:** 1.7 (`local/package/obscoop-test-1.7.zip`, protocol 3: both players need 1.7). Co-op confirmed by the owner up to 1.1 functionally; 1.2-1.7 are graphics, text and enemy smoothing, not run by bots in co-op.
 - **Code:** `local/coopdll/src/` (`obscoop.c` includes `net.c`, `sync.c`; hooks and protocol are described in comments there and in the dated sections below).
 - **Tools:** `sh local/runs/suite.sh [test ...]` runs bot tests on two test copies (one line per test; refuses if the owner's game is running). `sh local/runs/release.sh <version> "<tested>"` builds, packages, installs in the host copy, appends to these notes, commits and pushes.
 - **Owner preferences:** build only unless asked to test; short replies; one playtest report with logs in `local/logs/`.
@@ -871,3 +871,9 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - Package `local/package/obscoop-test-1.6.zip` (DLL SHA-256 `2f8a52ce…`), host test copy updated. Tested on this DLL: build only: 1.5 minus the font texture swap (reverted on owner request; likely cause of letters under a character: swap keyed by a freed and reused texture address).
 - **Owner report on 1.5:** "there is text under the red clothed character next to the fountain". Not reproduced in a test copy (SSAA 2 and 1, courtyard from the save). Likely cause (derived): the font swap was keyed by the D3D texture address. After the game frees a font texture (level load) and the address is reused, `SetTexture` kept binding the font copy, e.g. on a decal under a character. **Reverted in 1.6 on owner request**; the 1.4 text sizing stays.
 - Package `local/package/obscoop-test-1.7.zip` (DLL SHA-256 `7a90942c…`), host test copy updated. Tested on this DLL: build only: enemy smoothing (protocol 3); not run.
+
+### Owner feedback and enemy smoothing (1.7, 2026-10-25)
+- **Owner (playtests):** rejoining after a reload "is fine now"; fullscreen with supersampling "is perfect".
+- **Enemies (1.7, built, not run):**
+  - Before: the guest placed enemies only when a `PKT_PNJ` arrived; the guest's own AI moved them in between.
+  - Now: `PKT_PNJ` carries the host's send time (protocol 3). The guest keeps 32 snapshots and every frame places each enemy at the same delayed host time as the characters (`g_last_rt`). Position and facing are blended per list index when the vtables match; no blending across a jump over 150 units or for a dead enemy; extrapolation up to 50 ms. Health and death flags come from the nearest snapshot.
