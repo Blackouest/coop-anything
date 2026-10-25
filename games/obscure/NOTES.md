@@ -849,3 +849,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - The renderer slots, for calls returning to `0x45beb6` or into `FUN_0045d440`, scale the rectangle by `TEXT_SCALE` (default = SSAA) about that anchor.
 - **Check (test copy, SSAA 2):** main and pause menu text at native-looking size, centred on the highlight bars, game responsive. In-game message boxes were not seen. Co-op not run.
 - **Package 1.4:** guest ini gains `TEXT_SCALE=` (empty = SSAA).
+- Package `local/package/obscoop-test-1.5.zip` (DLL SHA-256 `470ed6a2…`), host test copy updated. Tested on this DLL: visual checks only (test copy, windowed, SSAA 2): sharp font copies made for 4 font textures, pause menu text crisp at normal size; ANISO 0 vs 16 measured +4% detail on far ground; ReShade presets clean/horror compile and run ~280 fps; co-op not run.
