@@ -814,3 +814,19 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Check (windowed test copy, 1904x1421 window, SSAA 2 → 3808x2842):** 3D, HUD icons and the pause menu fill the window, ~280 fps. **Menu text is half size**: the font is drawn in fixed pixels. The fullscreen→borderless path was **not run**.
 - **Setting:** `SSAA` (ini) / `OBSCOOP_SSAA`. Missing or 1 = off, 2, 4. Package 1.2 ships `SSAA=2` in the guest ini; the host's `start_host.bat` sets `OBSCOOP_SSAA=2`.
 - Package `local/package/obscoop-test-1.3.zip` (DLL SHA-256 `851da8ce…`), host test copy updated. Tested on this DLL: visual check only (test copy, windowed): SSAA 2 + ANISO 16 + ReShade 6.8.0 (SMAA, CAS, Vibrance) running, effects reach the screen (Monochrome test), game responsive; ReShade finds no depth with SSAA on (MXAO off); co-op not run.
+
+### ReShade and texture filtering (1.3, 2026-10-25)
+- **dgVoodoo2 skipped (decision, told the owner):** its gains (forced resolution and MSAA) are covered by the mod's SSAA. ReShade runs on D3D9 directly. dgVoodoo's D3D9 support is its weakest part, and it would sit between the game and the SSAA hooks.
+- **Downloads (pinned, in `local/dl/`):**
+  - `ReShade_Setup_6.8.0.exe` from reshade.me, SHA-256 `207aea16…c0b4`. Signer thumbprint `589690208A5E52FB96980C4A6698F50ACD47C49F` matches the one reshade.me publishes (self-signed, so Windows says "UnknownError"). Not run: `ReShade32.dll` was read out of the setup's embedded zip and used as `d3d9.dll`.
+  - Shaders, as codeload zips:
+    - crosire/reshade-shaders `slim` @ `fd00221` (`a3b110ba…`)
+    - CeeJayDK/SweetFX @ `93ddf39` (`e1e1d651…`: SMAA, CAS, Vibrance)
+    - martymcmodding/qUINT @ `98fed77` (`2f6ff2f5…`: MXAO)
+- **Observed in a windowed test copy (SSAA 2):**
+  - ReShade wraps the device and the mod's extra output swap chain, and gives the latter its own config `ReShade2.ini`. The implicit swap chain is never presented, so effects must be configured in `ReShade2.ini`; it is shipped as a copy of `ReShade.ini`.
+  - A Monochrome-only preset turned the screen grey, so effects reach the screen.
+  - DisplayDepth showed no depth, so MXAO cannot work with SSAA on (it stays off in the preset). Untested with SSAA 1.
+  - 40 effect files compiled, no errors, ~280 fps.
+- **ANISO (mod):** device `SetSamplerState` (slot 69) turns `MINFILTER` LINEAR into ANISOTROPIC with `MAXANISOTROPY` = level. Settings `ANISO` / `OBSCOOP_ANISO` (0 or missing = off). Log "anisotropic filtering x16" seen; the visual difference was not compared.
+- **Package 1.3:** guest ini `SSAA=2`, `ANISO=16`; optional `graphics/` folder (ReShade + preset `ObscureCoop.ini`: SMAA, CAS 0.6, Vibrance 0.15). Host copy: ReShade installed, `start_host.bat` sets `OBSCOOP_ANISO=16`. Co-op not run on 1.3.
