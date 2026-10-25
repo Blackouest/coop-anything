@@ -181,6 +181,25 @@ the only place `+8 = 3` is written. `video_cfg.dat` is read and written through 
   sending a chosen axis, player 2 walked at headings 81.6, 8.6, -81.5 and -179.5 degrees for axes +y, +x, -y, -x
   (`tests/moveref_test.py`, 4/4). Camera yaw from the view matrix showed fixed angles of 0 and 90 degrees in the
   hall level (C000) and a single 90 degree angle in the courtyard. Not tested: two real camera zones at once.
+- **Movable props (1.10):** chairs, wheeled objects (TV stands) and basketballs are Noe entities (`CNoeChair` vtable
+  `0x6539a4`, `CNoeCasterObject` `0x65354c`, `CNoeBasketBall` `0x652f14`, `CNoeMobileRack` `0x653dc4`) wrapped by Toe
+  entities (`CToeEntityChair` `0x64732c`, `...CasterObject` `0x647318`, `...BasketBall` `0x647354`, `...MobileRack`
+  `0x6472d4`) in `CToeWorld` (`*(game+0x588)`), whose list at `+0xc` has nodes `{item, next}`; a Toe entity points to
+  its Noe entity at `+4`. The list also holds the characters' bone entities, so props are picked by class. A Noe
+  entity keeps its position at `+0xb0` (3 floats) and its rotation quaternion at `+0xbc`; vtable slots `0x4c`/`0x50`
+  read and `0x54`/`0x58` set them (they also update the matrix and the physics body), slot `0x30(1)` freezes the
+  velocity. The engine also has its own 9-byte serialisation for them (slot 3, tag, identity hash and x/y/heading packed
+  into 4 bytes inside given bounds; slot 4 reads it back); it was not used because of the coarse quantisation. Found
+  per level (class counts): chairs in most school levels (D000 1, level 19 5, 21 9, 25 13, 53 15, 71 19), wheeled objects
+  in levels 52 (1), 54 (4), 68 (1), 79 (3), a basketball in level 177; the courtyard (193) and C000/B000 have none
+  (they have closet doors, breakables and `CNoeEntityObject`). The host sends the poses that changed at 30 Hz plus every
+  prop about once a second (packet 20); both copies build the list in the same order, so a prop is its class and its
+  index among that class; the guest sets position and rotation with the entity's own setters. Test (level 54, 10 props,
+  `tests/props_test.py`, 6/6): same list on both copies, a prop moved by the host's setter follows, a caster shoved
+  225 to 324 units by a character in contact (teleported next to it) is within 2 units on the guest. Not tested:
+  pushing by walking (the keyboard input did not move player 1 right after a level change in that setup). Not synced:
+  closet doors (`CNoeClosetDoor`), breakables (`CNoeBreakable*`, `CEntityBreakableItem`), `CItPushable`/`CItMobile*`
+  items (none found in the levels scanned).
 - **Deaths:** the host follows the real-player object that joined as player 2 (it keeps its controller through the
   swap) rather than the slot; the guest never switches onto a dead character (access violation at `0x44ba63`,
   null body, otherwise). A dead host is player 2 after the swap and its START asks "Player 2 quits the party", so
