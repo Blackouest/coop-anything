@@ -898,3 +898,13 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
 - **Shim (tested):** device type outside 1..3 answers `INVALIDDEVICE` (`GetDeviceCaps`) or `INVALIDCALL` (`CheckDeviceType`, `CheckDeviceFormat`, `CheckDepthStencilMatch`, `CheckDeviceMultiSampleType`), as native does. With it Remix starts: no crash dumps, the window opens, the save loads into the courtyard, Remix's welcome dialog shows and the scene renders path-traced (very dark: no lights yet, no material/texture categories assigned). Screenshot `local/runs/rx_level.png`. The shim lives in the probe build (`local/coopdll_ds/src/drawstats.c`), not in the 1.7 package.
 - **Not tested:** captured scene content, lights, asset replacement, the mod's co-op under Remix (SSAA/text scaling/ReShade cannot run with it), frame rate and stability over time, other levels. Remix's welcome dialog has "basic session information" and "crash information" sharing ticked by default and Sentry crash reporting initialises at launch; nothing was clicked or changed.
 - Package `local/package/obscoop-test-1.8.zip` (DLL SHA-256 `02ca3d26…`), host test copy updated. Tested on this DLL: build plus suite death 9/9 and camera 3/3 (native, no Remix); single-copy Remix run: game starts, save loads, no crash dumps. Adds the REMIX setting (device-type guard for RTX Remix, auto on when .trex/d3d9.dll exists; SSAA ignored then). Co-op under Remix not run.
+
+### RTX Remix lighting (1.8, 2026-10-25)
+- **Owner report:** "rtx remix is dark".
+- **Cause (derived from Remix's `RtxOptions.md` and tested):** Obscure lights its world with baked vertex colours. Remix divides the brightness out of vertex colours by default (`rtx.vertexColorIsBakedLighting`) and adds only a dim distant fallback light, so the scene gets almost no light.
+- **Tested in `local/obscure-remix` (courtyard from the save, screenshots in `local/runs/v_*.png`):**
+  - Baked lighting kept (`vertexColorIsBakedLighting = False`, strength 1): still dark.
+  - Plus a fallback light of 6,6,6 (distant, always on): checked in `v_B.png`, not compared further.
+  - Plus a sphere fallback light attached to the camera (`fallbackLightType = 1`, radius 40, radiance 400,380,340, offset 0,60,0): fountain, statues, benches and the character are clearly lit. Picked as the default.
+- **Shipped:** `rtx.conf` in `local/package/obscoop-test-1.8/` (zip rebuilt, README explains it). It is a stop-gap look, not Remix-native lighting: real lights would be placed in the Remix toolkit.
+- **Not tested:** other levels (indoor, dark-aura), frame rate cost, whether the light looks right in motion.
