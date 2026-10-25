@@ -116,7 +116,8 @@ enemy smoothing) were checked by screenshots and measurements in test copies and
 
 ## How to play
 
-See the [obscure-coop README](https://github.com/Gyurooo/obscure-coop#play). In short:
+Windows download: [obscure-coop 1.8](https://github.com/Gyurooo/obscure-coop/releases/tag/v1.8). See the
+[obscure-coop README](https://github.com/Gyurooo/obscure-coop#play). In short:
 
 - **Friend:** drops `xinput1_3.dll` and `obscoop.ini` next to `Obscure.exe` and starts the game from
   Steam.
