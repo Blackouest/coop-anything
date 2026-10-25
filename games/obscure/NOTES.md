@@ -836,3 +836,16 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Measured in the fountain area: 6.4% of pixels more than 30/765 darker than without MXAO (2.2% at defaults). Contact shadows at the fountain steps, under feet and in the basin (`local/runs/mxao_compare.png`). ~280 fps.
   - Shipped on: host copy and the 1.3 package's `graphics/` (`ReShade.ini` and `ReShade2.ini` identical).
 - Package `local/package/obscoop-test-1.4.zip` (DLL SHA-256 `251b4813…`), host test copy updated. Tested on this DLL: visual check (test copy, windowed, SSAA 2): main and pause menu text back to native size and centred, game responsive; in-game message text not seen; co-op not run.
+
+### Text size with SSAA (1.4, 2026-10-25)
+- **Code (observed):**
+  - Fonts are bitmaps (`font_holstein16/24/30`, font manager `*(0x6ab8ec)`, e.g. line height 24 at `+0x4c`), drawn 1:1 in pixels.
+  - `FUN_0045ba60` draws a string: thiscall on the font manager; 9 arguments x, y, string, colour, box, box colour, centred, height, flags; `ret 0x24`. Entry `55 8b ec 6a ff`.
+  - Each glyph goes through renderer `*(0x6ab890)` vtable `+0xb8`/`+0xc0` from `call eax` at `0x45beb4` (return `0x45beb6`). Arguments: x0, y0, x1, y1, u0, v0, u1, v1, colour, texture (`0x5e5d20` is the float-to-int helper).
+  - The background box is `FUN_0045d440` (775 bytes), which uses the same renderer call.
+  - Menu rows are placed as fractions of the screen height (`FUN_00534290`: `+0x18c` × a/33.9), so only the glyphs stay small.
+- **Fix:**
+  - Entry hook (5-byte jmp + trampoline) records the anchor: x, or the screen centre when centred; y + half the current font's line height (`+0x1cc`).
+  - The renderer slots, for calls returning to `0x45beb6` or into `FUN_0045d440`, scale the rectangle by `TEXT_SCALE` (default = SSAA) about that anchor.
+- **Check (test copy, SSAA 2):** main and pause menu text at native-looking size, centred on the highlight bars, game responsive. In-game message boxes were not seen. Co-op not run.
+- **Package 1.4:** guest ini gains `TEXT_SCALE=` (empty = SSAA).
