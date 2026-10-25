@@ -835,3 +835,4 @@ Every run was started and stopped with `local/runs/run.sh`, which compares a bef
   - Defaults gave very thin AO (debug view). Settings that work: `RESHADE_DEPTH_LINEARIZATION_FAR_PLANE=10000.0`, `MXAO_SMOOTHNORMALS=1`, `MXAO_SAMPLE_RADIUS=8`, `MXAO_SSAO_AMOUNT=1.5`.
   - Measured in the fountain area: 6.4% of pixels more than 30/765 darker than without MXAO (2.2% at defaults). Contact shadows at the fountain steps, under feet and in the basin (`local/runs/mxao_compare.png`). ~280 fps.
   - Shipped on: host copy and the 1.3 package's `graphics/` (`ReShade.ini` and `ReShade2.ini` identical).
+- Package `local/package/obscoop-test-1.4.zip` (DLL SHA-256 `251b4813…`), host test copy updated. Tested on this DLL: visual check (test copy, windowed, SSAA 2): main and pause menu text back to native size and centred, game responsive; in-game message text not seen; co-op not run.
