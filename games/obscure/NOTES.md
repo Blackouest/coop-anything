@@ -10,7 +10,7 @@ The summary below is current. The dated sections after `## Sources` are the runn
 - **Code:** `local/coopdll/src/` (`obscoop.c` includes `net.c`, `sync.c`; hooks and protocol are described in comments there and in the dated sections below).
 - **Tools:** `sh local/runs/suite.sh [test ...]` runs bot tests on two test copies (one line per test; refuses if the owner's game is running). `sh local/runs/release.sh <version> "<tested>"` builds, packages, installs in the host copy, appends to these notes, commits and pushes.
 - **Owner preferences:** build only unless asked to test; short replies; one playtest report with logs in `local/logs/`.
-- **Next task:** owner considers the mod finished (2026-10-25). Open only: give back (update `games/obscure/README.md` to 1.7, directory entry, mod source in its own public repo, draft PR, close claim issue #183): ask the owner first, it publishes under their account. Known gaps for the write-up: ladders/racks/locks not mirrored, lag test not run, 1.2-1.7 not bot-tested in co-op.
+- **Next task:** none; the owner considers the mod finished (2026-10-25). Given back: code at https://github.com/Gyurooo/obscure-coop (MIT), draft PR cranebeaker/coop-anything#195 (write-up, directory entry, playbook; closes #183), waiting for the owner to tick the review box and mark it ready. Open for a future agent: ladders/racks/locks, lag test, full suite on 1.7.
 - **Open:** readable documents' page text on the guest (untested); which input moved the host's camera (unknown); other object interactions (ladder, rack, lock) not mirrored yet; lag/loss test prepared (`chaos_run.sh`), not run.
 
 ## Game identity (AGENTS.md rule 5), recorded 2026-10-24
