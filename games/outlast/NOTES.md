@@ -2,8 +2,7 @@
 
 > Where the scripts and patches are: the folders `harness/`, `patches/` and `play/` named below now live in [`tools/outlast-coop/` of the own fork https://github.com/G3RKA/OpenOL](https://github.com/G3RKA/OpenOL/tree/main/tools/outlast-coop) (as `harness/`, `relay-patches/`, `exe-patch/`, `play/`), not in this repository.
 
-Reading guide: "owner" in the early sections is the person whose agent ran the tests; from test run 5 on, "owner" mostly means the
-client that owns (simulates) an enemy. The scripts mentioned (`harness/...`) are in [harness/](https://github.com/G3RKA/OpenOL/tree/main/tools/outlast-coop/harness/). Screenshots and raw
+Terms: "owner" always means the client that owns (simulates) an enemy, OpenOL's `OwnerID`; the other clients only show a puppet of it. The scripts mentioned (`harness/...`) are in [harness/](https://github.com/G3RKA/OpenOL/tree/main/tools/outlast-coop/harness/). Screenshots and raw
 logs from the runs are kept privately (desktop captures; the repo rules forbid publishing them); the findings are written out here.
 
 ## Phase 0: triage (2026-10-20)
@@ -157,7 +156,7 @@ Observed:
 Side observation: `FMpConnectionTicker::IsTickableWhenPaused()` returns FALSE (`Multiplayer.h` ~172), so a paused
 game (pause menu, `bPauseOnLossOfFocus`) stops HELLO/PING/heartbeat. Not observed as a problem yet.
 
-### Test run 3: two clients on the standalone OpenOL-Relay 2.1.0 (2026-10-20, 23:30-23:47, owner approved)
+### Test run 3: two clients on the standalone OpenOL-Relay 2.1.0 (2026-10-20, 23:30-23:47)
 
 Setup: OpenOL-Relay `b9def512` (https://github.com/ShyKiss/OpenOL-Relay), `src/{main.cpp,server.c,cli.c,db.c}`
 built with MinGW (`gcc -c` the C files, `g++` main.cpp, `-lws2_32`), run as
@@ -245,7 +244,7 @@ Observed:
    (-9272,2) with 100 hp. A's enemy was NOT removed and kept fighting (attacked A next).
 5. Asymmetry: owner death wipes the owner's enemies for everyone; non-owner death does not touch them.
 
-Harness changes (after owner feedback "check state more often" and "mind obstacles"):
+Harness changes (the bots now check state more often and handle obstacles):
 - `goto.py` decides "stuck" by progress toward the target (no new best distance for 2 bursts), not by distance moved.
   Bouncing between two pieces of furniture used to reset the counter forever. Detours grow (back off, sidestep
   right/left 0.4 s * n, step forward); after 6 detours it reports `BLOCKED` with position and best distance.
@@ -289,7 +288,7 @@ on both clients at once), weapons, other enemy types, two PCs.
 
 ### Test run 7: story sync with a scripted fake peer (2026-10-21 00:47-01:03)
 
-Method change (owner asked for another approach after bot walking to find triggers was too slow):
+Method change (bot walking to find triggers was too slow):
 `harness/fake_peer.py` joins the relay room as a third player (text HELLO, binary `SRV_HELLO` nick, `SRV_PING`
 every 5 s) and injects `WORLD_TRIGGER_ACT` packets. Its `sweep` mode sends
 `<level>.TheWorld:PersistentLevel.Main_Sequence.SeqEvent_Touch_N` for N in a range, one every 3 s, then maps
@@ -333,7 +332,7 @@ MaxTriggerCount handling (count sent as 0 by the fake peer), killing/despawning 
 
 ### Test run 8: duplicated map enemy on screen, who it attacks (2026-10-21 01:06-01:26)
 
-Owner asked to cut manual walking and menu use. New one-command driver `harness/ol.py` (details in its docstring):
+To cut manual walking and menu use, a new one-command driver `harness/ol.py` (details in its docstring):
 `up` (relay + proxy, detached, HELLO probe), `launch N <map>` (clients started straight on a map by URL, no menus;
 waits for the Wwise log line, then wakes the window, retries; tiles windows; maps each client to its proxy port),
 `cp <idx> <name>` / `cpall <name>` (loads a checkpoint through the F6 overlay: Checkpoints tab, search box, Ctrl+A+Delete,
@@ -399,8 +398,8 @@ Read `docs/BUILD.md`, the CI workflow and the container recipe of OpenOL (commit
 3. Config switches in `OLMultiplayer.ini` exist without a rebuild: `SyncEnemies`, `SyncMatinees`, `SyncInteractable`, `SyncPickups` (all `True`
    by default; read in `FMpConnection::LoadConfig`). `SyncMatinees=False` stops a client from sending its trigger events; `SyncEnemies=False` stops sending and
    receiving enemy packets. They are on/off switches, not ownership, so they do not fix duplicates or out-of-context triggers; not tested.
-4. Fix path for A4 (one owner per map enemy) and B3 (area context for triggers): the OpenOL author, who has the source, via the issue
-   in the upstream report; or a relay-side filter (limited: the relay cannot tell a map enemy from an overlay-spawned one, it only sees names and positions).
+4. Fix path for A4 (one owner per map enemy) and B3 (area context for triggers): a source change by someone with the full source; a patch of the shipped exe (done later, test run 21);
+   or a relay-side filter (limited: the relay cannot tell a map enemy from an overlay-spawned one, it only sees names and positions).
 
 ### Test run 11: relay-side trigger filter (2026-10-21 19:20-20:15)
 
@@ -463,7 +462,7 @@ The overlay's Relay tab (F6) starts the same embedded relay the Multiplayer menu
 Setup: only the logging proxy (UDP 17778 -> 17780), client A on `prison_persistent` with `RoomCode=DEFAULT` (the embedded relay only has room `DEFAULT`), Start Relay on port 17780, then client B.
 1. **The shipped embedded relay speaks the 2.1.0 format.** A joined (`ID=1000`, identified), stayed connected for more than 70 s with exactly one `Connected!`, no timeout; B joined, both heroes streamed fresh
    state for another 40 s, no reconnects. So the reconnect loop of test run 2 is a property of the *embedded relay source copy in the repo*, not of the relay in the release exe (the exe was
-   built from a newer copy). The upstream report must say so (section 1 of the draft claimed it was unverified: now verified, it is NOT the shipped behaviour).
+   built from a newer copy). Problem 1 of the README is limited to the source copy accordingly.
 2. **The shipped embedded relay has the `ENEMY_LOC` id problem too** (game-free fake peers, port 17780, room `DEFAULT`): a late joiner's enemy snapshot contains `SPAWN` (1) but no `LOC` (4).
    So relay patch 0002 matters for "Start Server" hosts, but they cannot apply it without a rebuild; a standalone relay can.
 3. The overlay start needed no Steam. The Multiplayer menu button (`Press_CreateServer` = StartRelay + ConnectLocal + open map) and the Steam invite were not clicked; upstream issues #7/#8 may be about those or about Steam.
@@ -488,7 +487,7 @@ and a visual or state oracle; not done. The failing check was removed from `suit
 README build check (2026-10-22): a fresh copy of `OpenOL-Relay` `b9def512/src`, both patches applied in order (`patch -p1 -d src`), compiled exactly as in the README
 (`gcc -O2 -c server.c cli.c db.c`, `g++ ... -lws2_32`), reproduces the patched tree byte for byte; `relay_filter_test.py` 7/7 and `relay_state_test.py` 8/8 on that binary.
 
-### Open hypothesis (owner, 2026-10-22, unverified)
+### Open hypothesis (2026-10-22, unverified)
 
 The duplicated map enemies (A4, test run 8) may occur only after a checkpoint is loaded through the F6 overlay (`StartNewGameAtCheckpoint`: `ClearAllProgress`,
 `SaveCheckpoint`, `RestartPlayer` on every client), and not during normal story progress. All duplicate evidence so far comes from overlay loads. Not
@@ -508,16 +507,16 @@ players who are apart. Test: play both clients from New Game to the first map en
 1. Test in-menu "Start Server" (embedded relay in the shipped exe) the same way. If it loops, fix = rebuild the
    embedded relay from OpenOL-Relay `server.c`, or host with the standalone relay.
 2. Bot checks still open: story triggers/cutscenes, checkpoint/level change sync, enemy owned by B,
-   hiding from an enemy, what happens to level state (doors, enemies) after the owner's death reload.
-3. Two-PC test (owner + friend) only after the bot checks: host runs OpenOL_Relay with UDP 7777 forwarded,
-   friend sets IP/port/room `PUBLIC` in Multiplayer settings.
-4. Upstream report (ask the owner first): room `PUBLIC` vs `DEFAULT`, silent HELLO_FAIL, embedded relay protocol
+   hiding from an enemy, what happens to level state (doors, enemies) after a player's death reload.
+3. Two-PC test with two people only after the bot checks: the host runs OpenOL_Relay with UDP 7777 forwarded,
+   the other player sets IP/port/room `PUBLIC` in Multiplayer settings.
+4. Findings an upstream report would cover (none filed): room `PUBLIC` vs `DEFAULT`, silent HELLO_FAIL, embedded relay protocol
    mismatch, ENEMY_* id mismatch, minimized-window init stall.
-5. Not done yet: `gh` (not installed), claim-a-game issue, fork/PR. All need the owner's OK.
+5. Not done at this point: `gh` (not installed), claim-a-game issue, fork/PR (done later: claim issue #133, the fork, this write-up's PR).
 
 ### Tentative path
 Revive/extend OpenOL (playbook/reviving-abandoned-mods.md): it is recent, has a working
-networking layer and a release; first test with two local instances, not the owner.
+networking layer and a release; first test with two local instances, not with people.
 
 ### Test run 17 (2026-10-22): guide dry run over the LAN address
 Relay started as the player guide says (`OpenOL_Relay.exe --port 7777`, default bind `0.0.0.0:7777`, room `PUBLIC`); one client with `IP=<this PC's LAN address>` and `UdpPort=7777` (ini restored afterwards) logged `Connected!` and the relay logged `joined room 'PUBLIC'`. Script: `harness/lan_dryrun.py`. No firewall prompt appeared on this PC. Not a two-PC or internet test: traffic never left the machine.
@@ -550,7 +549,7 @@ Fully Ghost took a client through the gate in a few seconds; flying blind inside
 Dry run on the VPN adapter: `lan_dryrun.py` with the address of a VPN adapter (Radmin VPN, network category Public in Windows) connected (`Connected!`, the relay saw the client from that address). The relay executables that had been started before already had inbound allow rules for Public networks (read-only look at the firewall rules), so a friend who reaches the host through that VPN would not meet a new prompt for those executables; another copy of the relay at another path will ask again.
 
 ### Test run 21 (2026-10-22): native patch for the duplicated map enemies
-Owner's decision: patch the exe ourselves (Ghidra 12.1.4 from the official NSA GitHub release, SHA-256 matched the release notes; JDK 21 was already installed; everything in the workspace).
+Decision: patch the exe directly (Ghidra 12.1.4 from the official NSA GitHub release, SHA-256 matched the release notes; JDK 21 was already installed; everything in the workspace).
 Observations (Ghidra on the OpenOL 2.1.0 exe, anchored on strings of OpenOL's public `EnemyChannel.cpp`):
 - `ApplySpawn` = `FUN_14171eb00` (only direct caller at `0x14172b0b4` in `OnBinaryPacket`); its body matches the source line by line: `RemoteEnemies` at controller `+0xeb8` (count `+0xec0`, element `0x44`: name, `DummyEnemy +0x10`, `OwnerID +0x18`), `SpawnActor`, `Tag = MultiplayerDummyEnemy` at `+0x130`, `DestroyActor(controller)` = `FUN_1408d7550`.
 - `TickSend` = `FUN_141736ae0`: `IndexEnemies` through the controller vtable `+0xbb0`, `CachedEnemies` at `+0xe78`, health `+0x37c`, `SendSpawn` through the channel vtable `+0x268` at `0x141736cab`.

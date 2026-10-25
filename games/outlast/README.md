@@ -64,7 +64,7 @@ state of the two players can differ until they meet; pick a radius that covers t
 **Native patch for duplicated map enemies (OpenOL exe, optional):** [exe-patch](https://github.com/G3RKA/OpenOL/tree/main/tools/outlast-coop/exe-patch/README.md) adds about 1 KB of code to `OLGame.exe` of OpenOL 2.1.0 and redirects two calls (`ApplySpawn`, `SendSpawn` in `TickSend`): when two copies of one map enemy meet, the copy of the lower player id stays real and the other client destroys its own copy, keeping only the puppet. Found with Ghidra from OpenOL's public multiplayer source, no Outlast source. Tests A4, A4b pass with it and fail on the original exe (twin).
 
 **No-source workaround for duplicated map enemies (without the native patch):** set `SyncEnemies=False` in `OLMultiplayer.ini` on every client. Then no enemy packets are sent or applied: each player
-has only his own, independent copy of every enemy (no ghost copy, no double damage, but the partner does not see your enemies and they do not see his). A relay-side
+has only their own, independent copy of every enemy (no ghost copy, no double damage, but the partner does not see your enemies and you do not see theirs). A relay-side
 enemy filter was considered and rejected (see NOTES.md, test run 12).
 Problems found, with the evidence kept in [NOTES.md](NOTES.md) (test runs 1 to 11):
 
@@ -78,7 +78,26 @@ Problems found, with the evidence kept in [NOTES.md](NOTES.md) (test runs 1 to 1
 | 6 | Smaller: startup stall when the window starts minimized, pause stops pings, unknown `OpenOLResources` package, Steam profile warning | see NOTES | Test runs 3 and 7 and source |
 | 7 | The standalone relay never sends the late-join snapshot queue (picked-up items, matinee and hero state of the other players are lost for a late joiner) | `server_drain_snaps` is declared and documented as "called each tick" but the CLI loop in `main.cpp` does not call it (the loop in `server_run` does) | Protocol test S9 to S11 (XFAIL on the upstream relay, PASS with patch 0003); found with a debug build that logged the queue |
 
-A draft bug report for the OpenOL author is kept private until the owner approves posting.
+These problems have not been reported to the OpenOL authors; the fork is developed on its own.
+
+## Licence
+
+Checked on 2026-10-25 (GitHub API): [OpenOL](https://github.com/ShyKiss/OpenOL) and [OpenOL-Relay](https://github.com/ShyKiss/OpenOL-Relay) state
+no licence (`license: null`, no licence file), so all rights stay with their author by default. OpenOL's README says its files are
+"provided only for modding convenience" and that the built `OLGame.exe` replaces the files of your licensed Steam copy; it says nothing
+about forks or patches. The author has not been asked for permission. How the work here stays within that:
+
+- No OpenOL or Outlast binary is redistributed: no `OLGame.exe`, no `.upk`, no release archive, no game assets. The exe patch is shipped as
+  its own C source, the built code bytes and an applier that the player runs on the OpenOL 2.1.0 `OLGame.exe` they downloaded themselves
+  from the OpenOL release. The applier checks the input SHA-256 and the original bytes at each of the 7 patched sites (5 to 8 bytes each)
+  and refuses any other file. This is the "ship your work as a patch the player applies to their own copy" route of the hub's rule 7.
+- The relay patches are unified diffs against OpenOL-Relay `b9def512` (only the changed lines plus the usual 3 lines of context); the
+  player applies them to their own clone and builds the relay.
+- [G3RKA/OpenOL](https://github.com/G3RKA/OpenOL) is a GitHub fork, which GitHub's terms of service allow for a public repository; the
+  upstream files in it stay under the upstream terms. The fork's own work is in `tools/outlast-coop/` under the MIT licence (that folder
+  only). One upstream file is changed: `Development/Src/Multiplayer/Src/EnemyChannel.cpp` (+66 lines), the one-owner rule written as
+  source for reference; it is not built or shipped as a binary.
+- Anyone who wants to ship a prebuilt patched exe or more of OpenOL's code should ask the OpenOL author first.
 
 ## QA
 
@@ -190,12 +209,10 @@ map (test E5); the standalone relay does not have that problem.
 
 ## Next steps
 
-- Native fixes (one owner per map enemy, trigger context, checkpoint sync) need OpenOL's build: the full, non-public Outlast
-  source tree, Visual Studio 2012 and the DirectX SDK (see NOTES.md, build check). Options: the OpenOL author, a maintainer with
-  the source, or a relay-side filter (limited). Flip A4/B3 and E5 when those fixes land.
+- OpenOL cannot be rebuilt without the full, non-public Outlast source tree (see NOTES.md, build check), so further native fixes
+  go into the exe patch, the way the one-owner rule did. Still open there: trigger context (fire a trigger only for players near it)
+  and the E5 enemy position in the relay inside the shipped exe.
 - Not exercised in the game, only by protocol tests: pickups, cutscene (matinee) state, the effect of a remote push. The F6 overlay
   cannot spawn items (Spawns has only Enemies), so a check needs a real story pass.
 - Check whether duplicates also appear in normal story progress, not only after overlay checkpoint loads (needs a New Game run).
 - Test "Start Server" / Steam invites by hand, and two PCs over the internet (`lan_dryrun.py` covers one PC via its LAN address).
-- Offer the three relay patches upstream (they need no game source); wait for the author's view on the trade-off (missed triggers).
-- Post the bug report upstream once the owner approves.
