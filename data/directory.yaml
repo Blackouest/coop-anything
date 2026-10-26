@@ -2824,8 +2824,9 @@
     co-op. Not to be confused with the separate closed CyberMP project. Last push 2024-12-21 (verified via GitHub
     API), stalled at the patch 2.2 era; lives on through NightCityMP (2.31a continuation) and the oxylol story fork.
   sources:
+  - https://api.github.com/repos/tiltedphoques/CyberpunkMP
   - https://github.com/tiltedphoques/CyberpunkMP/blob/main/README.md
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -2851,7 +2852,7 @@
   sources:
   - https://www.pcgamesn.com/cyberpunk-2077/multiplayer-cybermp-mod
   - https://www.dsogaming.com/videotrailer-news/the-cyberpunk-2077-multiplayer-mod-is-still-alive/
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -2874,8 +2875,9 @@
     own save. Targets game patch 2.31 and needs RED4ext, redscript, Codeware, ArchiveXL, TweakXL. Host pushes game
     time, weather and tracked quest every 2 s; guest clocks only move forward. Last push 2026-10-10 (GitHub API).
   sources:
+  - https://api.github.com/repos/oxylol/cp2077-coop
   - https://github.com/oxylol/cp2077-coop
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -2899,9 +2901,10 @@
     playthrough. Downloadable v0.0.37/alpha.5 ZIP (CET host/join panel, Python relay on UDP 11778). Source now
     integrates Bukczyk's typed session foundation for player groups. Last push 2026-10-20 (GitHub API).
   sources:
+  - https://api.github.com/repos/KyleBuildsAI/cp2077-coop
   - https://github.com/KyleBuildsAI/cp2077-coop
   - https://github.com/KyleBuildsAI/cp2077-coop/pull/3
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -2931,7 +2934,7 @@
   - https://nightcoop.net/
   - https://www.polygon.com/cyberpunk-2077-co-op-mod-nightcoop
   - https://www.gamingbible.com/news/platform/pc/cyberpunk-2077-co-op-multiplayer-mod-nightcoop-184269-20261020
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -2956,8 +2959,9 @@
     emotes and upstream's demo jobs. NPCs, traffic, world state, quests and combat damage are not synced yet.
     Distribution limited to GitHub and the project's own site per upstream license. Last push 2026-07-20.
   sources:
+  - https://api.github.com/repos/blyatiful1/NightCityMP
   - https://github.com/blyatiful1/NightCityMP
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -2982,8 +2986,9 @@
     health loss and death presentation at commit 481609a; reconnect death recovery still fails. Not a public
     release. Last push 2026-10-20 (GitHub API).
   sources:
+  - https://api.github.com/repos/Bukczyk/CP2077-Coop
   - https://github.com/Bukczyk/CP2077-Coop
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -3009,8 +3014,9 @@
     mission NPC AI and dialogue relay still open. CERBERUS scripted bot events (8-50 bots). README download links
     still point at a placeholder domain, so no public player download found. Last push 2026-08-25 (GitHub API).
   sources:
+  - https://api.github.com/repos/nobody71004/RedSync
   - https://github.com/nobody71004/RedSync
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -3038,10 +3044,11 @@
     Windows/Linux servers. Org repos (app, resources, devkit) public; client module source status not confirmed.
     Org repos last pushed 2026-10-22.
   sources:
+  - https://api.github.com/repos/Open2077/open77-app
   - https://open2077.net/devblog/2026-08-25-state-of-the-net
   - https://open2077.net/
   - https://github.com/Open2077/open77-app
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Cyberpunk 2077
   year: 2020
   engine: REDengine 4
@@ -3065,8 +3072,9 @@
     bridge process that forwards over TCP to a relay; setup GUI for non-technical users. No gameplay sync claims
     verified. Last push 2026-08-09 (GitHub API).
   sources:
+  - https://api.github.com/repos/Chaoskjell/Coop-Cyberpunk-Mod
   - https://github.com/Chaoskjell/Coop-Cyberpunk-Mod
-  checked: 2026-10-23
+  checked: 2026-10-25
 - game: Elden Ring
   year: 2022
   engine: FromSoftware proprietary
