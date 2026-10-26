@@ -12,8 +12,10 @@
 
 Not playable yet. On one PC, a host and a guest can be in the same ship: the guest joins over UE's own
 netcode, gets the host's ship layout copied over by the mod, both screens render, the guest walks around
-and players collide. The guest cannot use weapons, the map/builder, lockers or terminals yet: that code is
-single-player Blueprint that runs on the guest without authority.
+and players collide. Since 2026-10-26 the guest also switches and fires its weapons (real damage both
+ways, own projectiles and impacts on its screen), has its own health bar, hit feedback and hints.
+Guest death and crew promotion are being worked on. The map/builder, lockers, terminals and PDA do not
+work for the guest yet.
 
 ## Existing work
 
@@ -75,21 +77,20 @@ Not playable. Developer instructions in the project README.
 
 ## Known issues
 
-- Guest cannot take weapons, open the map/builder, or use lockers and terminals.
+- Guest cannot open the map/builder, or use lockers, terminals and the PDA.
+- Guest death: the game's promotion camera finishes on player 0 (the host); the mod redirects it, still unstable (one host crash in testing, guest can land inside a workstation).
+- Automatic weapons fire once per click on the guest; the slot-2 weapon is not visible on the host.
 - Guest sees the host's weapon floating: the player mesh is first-person only, no third-person body.
-- Door states are not replicated (closed on the guest, walkable).
-- Parts of the ship are missing on the guest (not identified yet).
+- Door states are not replicated (closed on the guest, walkable). Ship colours differ on the guest.
 - Ship layout is passed through a file, so host and guest must be on the same PC for now.
-- Intermittent crash at startup (3 of roughly 20 launches on 2026-10-25), cause unknown, no UE4SS frames in the stack.
+- Intermittent crash at startup, cause unknown, no UE4SS frames in the stack.
 
 ## Next steps
 
-1. Run the game's own init for the guest (`OnLevelLoadedInitializePlayer` / `InitializePlayer`,
-   `InitWeaponsFromSave`) on the host instead of copying values.
-2. Guest-to-host messages without new RPCs (an existing reliable string RPC hooked on the host), then
-   send the ship layout over it instead of a file.
-3. Forward the guest's input actions (`InpActEvt_*` Blueprint functions) to the host and run them on
-   the guest's pawn; deal with `GetPlayerController(0)` assumptions (impersonation window, see
-   [the-doors-of-trithius](../the-doors-of-trithius/README.md)).
-4. Third-person body, door sync, Steam relay (the Epic build has no steam_api64.dll), automated
-   two-client tests with the repo's tools.
+1. Finish guest death with the game's rule (a death costs a clone/crew member; with two players and one
+   clone left, a dead player waits for a new clone).
+2. Lockers, terminals, PDA and map for the guest: UI on the guest, world effects on the host.
+3. Send the ship layout over the message channel instead of a file; then Steam relay (the Epic build
+   has no steam_api64.dll).
+4. Third-person body, door and colour sync, automated two-client tests with the repo's tools.
+5. Host and join buttons in the game's main menu instead of F9/F8.

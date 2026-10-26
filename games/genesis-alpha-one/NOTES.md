@@ -367,3 +367,12 @@
 ### Derived
 - Weapons for the guest must exist on the host: spawn the four weapon actors for the guest (same classes) owned by its pawn, or make the game's init run with the guest as "player 0".
 - Forwarded actions need an impersonation window: while the host runs a guest action, player-0 lookups (and the HUD reference) must resolve to the guest.
+
+## Phase 4e: guest weapons, damage, health and death (2026-10-25/26, probes v23-v37)
+Detailed log in the project repo's docs/NOTES.md. Key findings:
+- UE4SS 3.0.1 hid Blueprint call errors; the experimental build (UE4SS_v3.0.1-1183-gcdbc0b66) gives readable errors and working `ForEachProperty`.
+- Messages without new RPCs: guest to host `PlayerController.ServerChangeName("COOP|...")` hooked on the host; host to guest `ClientMessage("COOP|...")` hooked on the guest.
+- Guest weapons: the game's own `AddEquipmentToInventory(WeaponID, Slot)` on the guest's pawn, on the host and on the guest. Forwarded `InpActEvt_*` calls then aim with the guest's control rotation and do real damage.
+- The guest's local Fire input never reaches `AttemptToUpdatePrimaryAction`; calling `PlayerShootsWeapon()` on its own pawn shows its projectile and impact. Ammo is checked against `GetPlayerCharacter(0).PlayerState.Ammunition`, so the host sends its pool.
+- Everything the guest pawn's Blueprints do on the host for feedback targets player 0: camera shake (`GetPlayerController(0).ClientPlayCameraShake`), the unbound damage post-process, HUD fades, tutorial hints, the promotion panel, and `BP_PromotedCaptain` ends with `GetPlayerCharacter(0).OnPromotionFinished`. The host hooks these and undoes or redirects them; the guest replays them locally.
+- Guest death sits behind a DoOnce (`Temp_bool_IsClosed_Variable_6`) reopened only at the end of the game's own resurrect path.
