@@ -8147,6 +8147,36 @@
   checked: '2026-10-24'
   searched:
   - 'Same searches as the Call of Duty (2003) entry, 2026-10-23'
+- game: Obscure
+  year: 2004
+  engine: Hydravision in-house (.hvp archives, .hoe scripts); not RenderWare
+  project: obscure-coop
+  url: https://github.com/Gyurooo/obscure-coop
+  other_urls: []
+  kind: mod
+  status: playable
+  coop_scope:
+    players_visible: 'yes'
+    story: 'yes'
+    enemies: 'yes'
+    world_state: partial
+    items: per-player
+  players: '2'
+  networking: steam-relay
+  open_source: 'yes'
+  last_activity: 2026-10
+  qa: automated
+  notes: Online co-op over Steam for the Steam version (build 215286), built on the game's own 2-player local co-op. A proxy xinput1_3.dll makes the friend's controller
+    the host's player 2 and mirrors the host's game to the friend's copy (characters, enemies, items, doors, story flags, levels, weapons, inventory, deaths,
+    save loading), with smoothing over the internet. Optional in-game supersampling, 16x filtering, a tuned ReShade setup and 16:9 widescreen. Ladders, racks and locks
+    do not animate on the friend's screen. Bot tests drive two real copies on one PC (load, death, doors, items, combat) but only ran on builds up to 1.0;
+    builds 1.1 to 1.8 (smoothing, graphics, widescreen) were not bot-tested, only checked by screenshots, measurements and playtests over Steam. MIT.
+    Write-up in games/obscure.
+  sources:
+  - https://github.com/Gyurooo/obscure-coop
+  - https://github.com/cranebeaker/coop-anything/issues/183
+  - https://store.steampowered.com/app/254460/
+  checked: '2026-10-25'
 - game: Vanquish
   year: 2010
   engine: Platinum Engine (in-house, Havok physics)
