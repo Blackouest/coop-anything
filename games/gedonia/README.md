@@ -15,7 +15,7 @@ This is the original Gedonia, not Gedonia 2 (which has official co-op).
 Two or more players can play the open world and the story together over Steam (friends, in-game invites,
 relay) or in the home network. Players, enemies, story, conversations, loot spots, world events,
 expeditions with their generated dungeons, time and weather are shared. Every feature has an automated
-two-client scenario; the owner's real sessions with friends over Steam went fine, and the points they
+two-client scenario; real sessions with friends over Steam went fine, and the points they
 found (0.6.x) are fixed in 0.7.x. Status: alpha (0.7.1).
 
 ## Existing work
@@ -124,7 +124,7 @@ All in the [Gedonia Co-op](https://github.com/Zerbith/gedonia-coop) plugin; each
   Earlier milestones (enemies with 20 % packet loss, expedition phases, late join) are listed in the
   mod repository's history.
 - After every run the real saves and registry values were compared with a backup (unchanged).
-- Real mouse clicks in the test windows were not automated (desktop control was not used). The owner
+- Real mouse clicks in the test windows were not automated (desktop control was not used). The tester
   and friends used the menus and shared conversations by hand in real sessions up to 0.6.x; the 0.7
   additions (hold-to-confirm ring, transformations) are only tested by the automated scenarios so far.
 

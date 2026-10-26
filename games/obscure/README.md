@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Engine | Hydravision in-house (`.hvp` archives, `.zwo` models, `.hoe` scripts); not RenderWare |
-| Versions tested | Steam app 254460, build 215286, `Obscure.exe` SHA-256 `7107439eb6ee1b20cad32e87f7a10a3a95b71c0b5ee26b1ec9139b263577a0f2`, Windows 11 |
+| Versions tested | Steam app 254460, build 215286, `Obscure.exe` SHA-256 `7107439eb6ee1b20cad32e87f7a10a3a95b71c0b5ee26b1ec9139b263577a0f2` |
 | Projects | [obscure-coop](https://github.com/Gyurooo/obscure-coop) (MIT; proxy `xinput1_3.dll`, source and bot tests); directory entry "Obscure / obscure-coop" |
 | QA level | automated for builds up to 1.0 (bot tests with two real game copies on one PC); builds 1.1 to 1.8 were not bot-tested, only checked by screenshots, measurements and playtests over Steam (see QA) |
 | Last updated | 2026-10-25 |

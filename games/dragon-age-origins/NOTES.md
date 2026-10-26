@@ -170,7 +170,7 @@ the `dao-coop` repository.
 
 ## 2026-10-23 (later) — shared Event Log and independent players
 
-The owner reported the two panels showing different events and the players being
+The tester reported the two panels showing different events and the players being
 dragged into one position. Root causes and fixes:
 
 - **Log desync.** Each game only wrote the events it generated itself (the host

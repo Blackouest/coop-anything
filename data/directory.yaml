@@ -8423,7 +8423,7 @@
   notes: Story Mode for two online on top of THEMOD 1.3 (a dinput8.dll proxy plus one QB script). The friend joins
     the host's story; cutscenes, goal cameras, won goals, guest swaps and the pro teammate are synced, and shared
     goals are won once both finish them. Skater stats stay per player. Ships a byte patcher that rebuilds THEMOD
-    1.3's exe from the player's own THUG2.exe, since THEMOD can no longer be downloaded. The owner and a friend
+    1.3's exe from the player's own THUG2.exe, since THEMOD can no longer be downloaded. The tester and a friend
     play it online; a scripted two-client walkthrough checks for crashes only. MIT. Write-up in
     games/tony-hawks-underground-2.
   sources:
@@ -8448,10 +8448,10 @@
     items: per-player
   players: '2-4'
   networking: steam-relay
-  open_source: 'yes (MIT)'
+  open_source: 'yes'
   last_activity: 2026-10
   qa: automated
-  notes: 'BepInEx 5 / HarmonyX plugin for the original Gedonia (Steam app 1114220, build 16727998; not Gedonia 2), built from zero. Steam P2P through the game''s own Steamworks.NET (friends-only lobby of 4, in-game invites) or plain UDP in the home network (LAN discovery). Host-authoritative: enemies, followers and world events have one owner with epochs; story calls (dialogue answers, triggers) run on every machine in the host''s order; shared conversations with voting; shared combat XP; spell effects and transformations shown to others; cutscenes start when every player confirms; chests, gathering spots, expeditions with seeded generated dungeons, travellers, time and weather, sounds; respawn crystals replace the reload-only death screen. QA: two game clients on one PC driven by test steps and bots (scripts/test-local.ps1, 35 scenarios, logged assertions and screenshots); real sessions of the owner with friends over Steam went fine, their findings fixed in 0.7. Each player keeps their own save. Write-up in games/gedonia/.'
+  notes: 'BepInEx 5 / HarmonyX plugin for the original Gedonia (Steam app 1114220, build 16727998; not Gedonia 2), built from zero. Steam P2P through the game''s own Steamworks.NET (friends-only lobby of 4, in-game invites) or plain UDP in the home network (LAN discovery). Host-authoritative: enemies, followers and world events have one tester with epochs; story calls (dialogue answers, triggers) run on every machine in the host''s order; shared conversations with voting; shared combat XP; spell effects and transformations shown to others; cutscenes start when every player confirms; chests, gathering spots, expeditions with seeded generated dungeons, travellers, time and weather, sounds; respawn crystals replace the reload-only death screen. QA: two game clients on one PC driven by test steps and bots (scripts/test-local.ps1, 35 scenarios, logged assertions and screenshots); real sessions of the tester with friends over Steam went fine, their findings fixed in 0.7. Each player keeps their own save. Write-up in games/gedonia/. MIT licence.'
   sources:
   - https://github.com/Zerbith/gedonia-coop
   - https://github.com/cranebeaker/coop-anything/issues/214

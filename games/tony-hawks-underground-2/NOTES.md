@@ -11,7 +11,7 @@ Phases done: 0-7 (2026-10-24 to 2026-10-26). The mod: https://github.com/LeftGam
 | Game | Tony Hawk's Underground 2, PC, 2004, Neversoft / Beenox port, English |
 | Store | unknown (disc install, no-CD exe; no Steam/GOG release exists) |
 | Engine | Neversoft engine (THPS4/THUG lineage), QB (QScript) bytecode scripts, `.prx` archives |
-| OS | Windows (owner runs Windows; agent works from WSL2) |
+| OS | Windows (Windows) |
 | `Game\THUG2.exe` | 2,695,168 bytes, SHA-256 `52fc88849654b34839ec2f96bff3a8c0b7a855df9a207aab9f2fca2e6bd440f3`, CRC32 `88af0474`, PE timestamp 1095202195 (2004-09-14) |
 | `Game\THEMOD 1.3.exe` | same size and section layout, 123 bytes differ from THUG2.exe; SHA-256 `2b1ac8a9282c7817d6999967d0d47bfabaf8b29ac220bbff9f634e107f1095c3`. Not THEMOD's original: see "THEMOD's installer" at the end |
 | `THEMOD 1.3.exe` (install root) | 2,224,553 bytes, SHA-256 `d3de1fa1a51fdd6b9487321f7e0a7ea99992692e4e738cbc0b875604188fa292`; THEMOD's NSIS installer (listed with 7-Zip 2026-10-26, not run) |
@@ -42,7 +42,7 @@ Phases done: 0-7 (2026-10-24 to 2026-10-26). The mod: https://github.com/LeftGam
 
 - Team Goal Attack may already credit a goal to the whole team (the "other_same_team" events suggest it).
 - THEMOD's exe changes are small (MOTD URL and a few code bytes); its real content is likely in `Data` (scripts/pre).
-- The owner's no-CD exe may have the same code layout as THUG2PM.exe (as the 2024 repack's does), which would let
+- The tester's no-CD exe may have the same code layout as THUG2PM.exe (as the 2024 repack's does), which would let
   thug2-decomp's DLL run on it.
 
 ### Unknown
@@ -77,9 +77,9 @@ not co-op (ModDB game page wording; not a mod).
 
 ## Next (phase 2-3 proposal)
 
-1. Decompile all QB (needs a QB decompiler built: NeverScript in Docker; agent build was blocked pending owner OK).
+1. Decompile all QB (needs a QB decompiler built: NeverScript in Docker; agent build was blocked pending approval).
 2. Diff THEMOD's Data against stock data to learn what THEMOD changes (needs a stock data reference).
-3. Check whether the owner's exe matches THUG2PM.exe's layout (PartyMod's bps against a matching input, or byte
+3. Check whether the tester's exe matches THUG2PM.exe's layout (PartyMod's bps against a matching input, or byte
    compare of known function addresses from thug2-decomp).
 4. Map Story progression in QB: `gameflow.qb`, `goal_utilities.qb`, `cutscene.qb`, level `*_scripts.prx`.
 5. Prototype: unlock Story goals in net Goal Attack (team), two clients on one PC over loopback.
@@ -157,7 +157,7 @@ Command line: host `-HOST -NAME P1 -HOSTNAME coop`, client `-CONNECT 127.0.0.1 -
 
 ## Pivot: story-mode co-op DLL (2026-10-24)
 
-Owner wants the real Story mode for both players (NPC quests, cutscenes). Approach: own `dinput8.dll` proxy
+Goal: the real Story mode for both players (NPC quests, cutscenes). Approach: own `dinput8.dll` proxy
 (repo `thug2-coop`, MinGW i686 in Docker) + `scripts\coop\coop.qb` appended to THEMOD's `thethug2mod.prx` (qdir.txt).
 
 ### Observations (runs on one PC, two windowed THEMOD instances)
@@ -220,11 +220,11 @@ Owner wants the real Story mode for both players (NPC quests, cutscenes). Approa
   screen edge, text "<name>  <m>m", rgba [90 170 255 100].
 - Injected "key up" did not move the skater (menus/Esc work): skater controls read input another way; unknown.
 - Bot: automation "goto <object|friend> [radius]" steers with W/A/D (skater forward = matrix row 2 at +0xC0+32);
-  reached the host from 2413 units in 9 s. Controls (owner): WASD move, numpad tricks (ollie kp2, grind kp8,
+  reached the host from 2413 units in 9 s. Controls: WASD move, numpad tricks (ollie kp2, grind kp8,
   kickflip kp4); Esc skips cutscenes, kp2 skips goal cutscenes; dialogs (Tony yes/no) use arrows + Enter.
-- Open (2026-10-24, paused by owner): Boston goal points differed once (host 0/1000, client 825/1000); points =
+- Open (2026-10-24, paused): Boston goal points differed once (host 0/1000, client 825/1000); points =
   sum of won goals' rewards (GoalManager_GetActiveRewardPoints 0x0055B7C0) + total_cheat_points. Not reproduced yet.
-  Owner request: goal cutscenes (goal intro / win cameras) for the client too.
+  Request: goal cutscenes (goal intro / win cameras) for the client too.
 
 ## Night run 2026-10-25 (Boston)
 - Two instances loading the same archives: one hit the disc-error screen (File::Open, exclusive open). Test-only:
@@ -274,14 +274,14 @@ Owner wants the real Story mode for both players (NPC quests, cutscenes). Approa
   PartyMod makes), 0x1F95BB `75` -> `EB` (GameSpy CD-key SDK, near gcd_init 0x005F9540), MOTD URLs ->
   thmods.com, `ReportStats` -> `RaportStats`, `qb_scripts.pre` -> `thethug2mod.pre`, peerchat -> peerchat1.thmods.com,
   HTTP user agent `GameSpyHTTP/1.0` -> `THEMOD13`.
-- The owner's installed THEMOD exe = the installer's + 3 changes by an unknown third party: 0x0048C170
+- The tester's installed THEMOD exe = the installer's + 3 changes by an unknown third party: 0x0048C170
   (CFunc_SetScreenBlur) -> `mov al,1; ret` (blur off), the 800x600 mode's immediates (0x4D876E / 0x4D878A) ->
   1920x1080, peerchat host back to `peerchat.gamespy.com`.
 - thmods.com does not answer (2026-10-26). The only trace found: a 2008 blog post listing THEMOD 1.0-1.3 with
   credit to "TH Mods" (https://dks-site.blogspot.com/2008/12/tony-hawk-underground-2-mod.html).
 - The installer holds a full copy of the game's exe, so the mod ships a byte patcher (`patcher/patch_themod.ps1`):
   size + SHA-256 + every original byte checked, writes `THEMOD 1.3.exe`, never overwrites. Its table applied in
-  Python to the owner's `THUG2.exe` gives the installer's exe (SHA-256 equal). Not yet run on Windows.
+  Python to the tester's `THUG2.exe` gives the installer's exe (SHA-256 equal). Not yet run on Windows.
 
 ### Features added
 - Shared goals: `goal_accept_trigger` wrapper -> `CoopSharedGoal mode=start` -> the peer starts it
@@ -300,6 +300,6 @@ Owner wants the real Story mode for both players (NPC quests, cutscenes). Approa
   -> the resolution, centred (x/y -1), scaled to fit the work area; the post-device `SetWindowPos(0,0,w,h)`
   (0x4D8891, 14 bytes) NOPed in windowed mode (PartyMod does the same). Tested 2026-10-26: windowed 1280x720
   (client 1280x720, centred), windowed 1920x1080 on a 1080p screen (1797x1011), full screen 1920x1080, `launcher`.
-- Splash-screen crash reported on a friend's Windows 11 PC at 2K: per the owner it happens with plain THEMOD 1.3
+- Splash-screen crash reported on a friend's Windows 11 PC at 2K: per a tester it happens with plain THEMOD 1.3
   too; running windowed avoids it. Not reproduced here.
 

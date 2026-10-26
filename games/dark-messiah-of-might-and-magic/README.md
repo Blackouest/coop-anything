@@ -51,7 +51,7 @@ Checks that actually ran (2026-10-23, Linux, KDE Wayland, Proton Experimental, S
 - The main menu shows Find Servers / Create Server. The "Platform Error: module failed to
   initialize" from [issue #13](https://github.com/KingDavidW/DarkMessiah-Coop-Mod-Files/issues/13) did not appear.
 
-Owner playtest (2026-10-24, not a structured test): Linux host under Proton, Windows clients
+Tester playtest (2026-10-24, not a structured test): Linux host under Proton, Windows clients
 joining over the internet through a port-forwarded listen server. The session worked. Players
 reported that sync is "a bit off", and that climbing chains feels laggy. Not recorded: ping,
 player count, and which `cl_*` cvars were set.
@@ -76,7 +76,7 @@ To uninstall, restore the backed-up files or use Steam's "Verify integrity of ga
 
 - Portcullis wheels: holding Use until the wheel finishes leaves the gate shut (softlock).
   Let go before the wheel finishes turning ([#8](https://github.com/KingDavidW/DarkMessiah-Coop-Mod-Files/issues/8)).
-- Sync feels slightly off in normal play, and climbing chains is laggy (owner playtest 2026-10-24).
+- Sync feels slightly off in normal play, and climbing chains is laggy (tester playtest 2026-10-24).
 - Clients notice input lag at about 150 ms ping; VPN overlays like ZeroTier made it worse for one user ([#16](https://github.com/KingDavidW/DarkMessiah-Coop-Mod-Files/issues/16)).
 - HUD: wrong cooldown timer, mana shown capped at 29, no underwater stamina bar; chat sometimes drops names.
 - Conflicts with the Unlimited Edition 1.4.1 modpack ([#6](https://github.com/KingDavidW/DarkMessiah-Coop-Mod-Files/issues/6)).

@@ -18,7 +18,7 @@ no ASLR) and apply to build 215286 only.
   `3627edef5383ad43ffc14ab14f8d81171b6c08fdcb9f52a657f24301d3fd7b00`.
 - Files in the install: `Obscure.exe`, `steam_api.dll`, `binkw32.dll`, `cachpack.hvp`, `datapack.hvp`,
   `kinepack.hvp`, `strmpack.hvp`, `mrs.bik`, `logoload.bmp`, `video_cfg.dat`, `Deluxe Content/`.
-- Tested on Windows 11. The exe is SteamStub-wrapped (`.bind` section) but `.text` is not
+- The exe is SteamStub-wrapped (`.bind` section) but `.text` is not
   encrypted (entropy 6.57), so it can be analysed directly; it was never unpacked.
 - Engine: **Hydravision in-house, not RenderWare** (the Wikipedia infobox says RenderWare). There are no
   RenderWare strings or `.txd`/`.dff` files, and 722 RTTI class names show the layers: `CZoe*` (renderer, scene,

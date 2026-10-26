@@ -30,7 +30,7 @@ Two players can play the whole campaign together: one hosts, the other joins ove
 
 ## What we changed
 
-All in patch `0032`. "Confirmed" means the owner checked it in two-player split screen on one PC after the fix; "not confirmed separately" means it was built and played over but nobody checked that specific behaviour.
+All in patch `0032`. "Confirmed" means the author checked it in two-player split screen on one PC after the fix; "not confirmed separately" means it was built and played over but nobody checked that specific behaviour.
 
 | Bug | Root cause | Fix | Test |
 |---|---|---|---|

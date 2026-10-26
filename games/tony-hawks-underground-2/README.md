@@ -3,15 +3,15 @@
 | | |
 |---|---|
 | Engine | Neversoft engine (THPS4 / THUG lineage), QB (QScript) bytecode scripts in `.prx` archives |
-| Versions tested | PC, English. `THUG2.exe` SHA-256 `52fc88849654b34839ec2f96bff3a8c0b7a855df9a207aab9f2fca2e6bd440f3`, run as THEMOD 1.3: the owner's `THEMOD 1.3.exe` SHA-256 `2b1ac8a9282c7817d6999967d0d47bfabaf8b29ac220bbff9f634e107f1095c3` (see "THEMOD" below) |
+| Versions tested | PC, English. `THUG2.exe` SHA-256 `52fc88849654b34839ec2f96bff3a8c0b7a855df9a207aab9f2fca2e6bd440f3`, run as THEMOD 1.3: the tester's `THEMOD 1.3.exe` SHA-256 `2b1ac8a9282c7817d6999967d0d47bfabaf8b29ac220bbff9f634e107f1095c3` (see "THEMOD" below) |
 | Projects | [thug2-coop](https://github.com/LeftGamer1/thug2-coop) (story co-op, this write-up) |
-| QA level | community-reports (the owner and a friend play it online); a scripted two-client walkthrough also runs, see QA |
+| QA level | community-reports (the tester and a friend play it online); a scripted two-client walkthrough also runs, see QA |
 | Last updated | 2026-10-26 |
 
 ## Where things stand
 
 Two people can play the Story Mode together online today. The host plays their own story and save; the friend
-joins the host's game and skates in the same level with the NPCs, cutscenes and goals. It is alpha: the owner and a
+joins the host's game and skates in the same level with the NPCs, cutscenes and goals. It is alpha: the tester and a
 friend play it over the internet and report bugs, and a full campaign has not been finished in co-op yet.
 
 ## Existing work
@@ -23,7 +23,7 @@ the full search list in [NOTES.md](NOTES.md).
 - [PARTYMOD](https://github.com/PARTYMANX/partymod-thug2) (MIT): fixes and OpenSpy online; no story co-op.
 - [thug2-decomp](https://github.com/CanuckAussieKev/thug2-decomp): C++ reimplementation as a DLL hook. Not used at
   run time here, but its decompiled code named most of the addresses this mod hooks.
-- THEMOD 1.3 (TH Mods, 2007-2008): a script mod the owner plays on and this mod is built on. Its site (thmods.com)
+- THEMOD 1.3 (TH Mods, 2007-2008): a script mod the tester plays on and this mod is built on. Its site (thmods.com)
   no longer answers and no download page or author was found.
 
 ## How the game works (for co-op)
@@ -68,7 +68,7 @@ THEMOD 1.3's installer (NSIS, 2,224,553 bytes, SHA-256 `d3de1fa1...`) holds `Gam
 of the game's exe, 122 bytes changed) and `Game\data\pre\thethug2mod.prx`. The exe changes: the save checksum's
 `jnz` NOPed (0x5A8A01; PartyMod makes the same patch), a `jne` made a `jmp` inside GameSpy's CD-key SDK code
 (0x5F95BB, near `gcd_init`; the online key check, not a disc check), the startup script archive renamed to
-`thethug2mod.pre`, and dead server names. The owner's copy has three more
+`thethug2mod.pre`, and dead server names. The tester's copy has three more
 changes made by someone else (screen blur off, 800x600 replaced with 1920x1080, chat server back to GameSpy).
 Shipping the installer would ship the game's exe, so the mod ships `patch_themod.bat` / `.ps1` instead: it checks
 the player's `THUG2.exe` (size, SHA-256, every original byte) and writes `THEMOD 1.3.exe` next to it, SHA-256
@@ -76,17 +76,17 @@ the player's `THUG2.exe` (size, SHA-256, every original byte) and writes `THEMOD
 
 ## QA
 
-- **Scripted two-client walkthrough** (owner's local tools, not in the mod repo): two windowed game copies on one
+- **Scripted two-client walkthrough** (local tools, not in the mod repo): two windowed game copies on one
   PC over loopback, driven by an in-process automation channel (`[debug] automation=1` wraps DirectInput and reads
   a command file per process). 17 steps: lobby, Story start, intro cutscenes skipped by the host, teleport, a goal
   won by the host, chapter change to Boston, pro teammate pick, a shared goal taken by the friend and finished by
   both, Barcelona, friend rejoin, host loss. It prints the log lines that show each step on both sides and fails
   only on a crash; it has no per-step PASS/FAIL asserts or mutation twins yet. Last run 2026-10-25: all 17 steps,
   no crashes. Goal sync, chat and collision were also run as separate scenarios with screenshots (2026-10-26).
-- **Real play**: one test session of about half an hour, the owner (host) and a friend over the internet through
+- **Real play**: one test session of about half an hour, the host and a friend over the internet through
   Porthole (Steam port sharing). It found more bugs, which were fixed afterwards, and led to new optional settings
   in `coop.ini` (player collision, keys, resolution). The fixed build has not had a real two-PC session yet.
-- **Not tested**: the mod on the exact exe the patcher makes (only on the owner's THEMOD copy, which differs in
+- **Not tested**: the mod on the exact exe the patcher makes (only on the tester's THEMOD copy, which differs in
   the three bytes regions above, none of them hooked); the patcher run on Windows (its byte table was checked by
   applying it in Python and comparing SHA-256).
 
