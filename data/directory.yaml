@@ -2334,6 +2334,62 @@
   - https://store.steampowered.com/app/704450/Neverwinter_Nights_Enhanced_Edition/
   - https://www.co-optimus.com/game/212/pc/neverwinter-nights.html
   checked: '2026-10-16'
+- game: 'Star Wars Jedi Knight II: Jedi Outcast'
+  year: 2002
+  engine: id Tech 3 (OpenJK)
+  project: jedi-outcast-coop
+  url: https://github.com/Benehiko/jedi-outcast-coop
+  other_urls: []
+  kind: fork
+  status: alpha
+  coop_scope:
+    players_visible: 'yes'
+    story: partial
+    enemies: 'yes'
+    world_state: partial
+    items: per-player
+  players: 2-4
+  networking: direct-ip
+  open_source: 'yes'
+  last_activity: 2026-07
+  qa: none
+  notes: GPL-2.0 single-player campaign co-op on OpenJK, shipped as patches 0001-0031 on a pinned OpenJK commit plus a
+    Go installer/launcher (Linux and Windows). The host runs the campaign; joiners run the game code as "dual-load"
+    remote clients over UDP or LAN discovery. Its README lists objectives/cutscene sync for joiners (Track F) as in
+    progress. Continued in masonan777/Jedi-Outcast-Coop; write-up in games/jedi-outcast.
+  sources:
+  - https://github.com/Benehiko/jedi-outcast-coop
+  checked: '2026-10-25'
+- game: 'Star Wars Jedi Knight II: Jedi Outcast'
+  year: 2002
+  engine: id Tech 3 (OpenJK)
+  project: Jedi-Outcast-Coop (fork of jedi-outcast-coop)
+  url: https://github.com/masonan777/Jedi-Outcast-Coop
+  other_urls:
+  - https://github.com/Benehiko/jedi-outcast-coop
+  kind: fork
+  status: partial
+  coop_scope:
+    players_visible: 'yes'
+    story: partial
+    enemies: 'yes'
+    world_state: partial
+    items: per-player
+  players: 2-4
+  networking: direct-ip
+  open_source: 'yes'
+  last_activity: 2026-10
+  qa: automated
+  notes: Continues Benehiko's mod with one cumulative patch (0032). Level scripts, enemies, Force powers and the
+    lightsaber now work for joiners, plus a revive system, in-game CO-OP menus, same-PC split screen with two
+    controllers (second window started by the game), LAN and direct IP. A level-crawl bot loaded all 26 campaign
+    maps with a joiner in one run (RESULT PASS 26/26). Tested with 2 players on one PC; two PCs and 3-4 players
+    untested. GPL-2.0. Write-up in games/jedi-outcast.
+  sources:
+  - https://github.com/masonan777/Jedi-Outcast-Coop
+  - https://github.com/masonan777/Jedi-Outcast-Coop/blob/main/docs/fork-changes.md
+  checked: '2026-10-25'
+  made_with_coop_anything: true
 - game: 'Star Wars Jedi Knight: Jedi Academy'
   year: 2003
   engine: id Tech 3 (OpenJK)
@@ -2355,7 +2411,8 @@
   qa: none
   notes: GPL-2.0 single-player campaign co-op on OpenJK, 2 to 16 players per current listings (the GitHub readme
     header still says 2 to 4). Each player keeps their own character and force powers; releases on GitHub, Nexus
-    and JKHub. The main repo koevetmc/JACoop returned not found. No Jedi Outcast co-op was found.
+    and JKHub. The main repo koevetmc/JACoop returned not found. Jedi Outcast co-op on OpenJK with the same
+    dual-load design exists (jedi-outcast-coop, see that game).
   sources:
   - https://github.com/Parricidium/JACoop
   - https://github.com/koevetmc/JACoop
