@@ -83,7 +83,9 @@ the player's `THUG2.exe` (size, SHA-256, every original byte) and writes `THEMOD
   both, Barcelona, friend rejoin, host loss. It prints the log lines that show each step on both sides and fails
   only on a crash; it has no per-step PASS/FAIL asserts or mutation twins yet. Last run 2026-10-25: all 17 steps,
   no crashes. Goal sync, chat and collision were also run as separate scenarios with screenshots (2026-10-26).
-- **Real play**: the owner (host) and a friend over Porthole (Steam port sharing), bugs reported from it were fixed.
+- **Real play**: one test session of about half an hour, the owner (host) and a friend over the internet through
+  Porthole (Steam port sharing). It found more bugs, which were fixed afterwards, and led to new optional settings
+  in `coop.ini` (player collision, keys, resolution). The fixed build has not had a real two-PC session yet.
 - **Not tested**: the mod on the exact exe the patcher makes (only on the owner's THEMOD copy, which differs in
   the three bytes regions above, none of them hooked); the patcher run on Windows (its byte table was checked by
   applying it in Python and comparing SHA-256).
