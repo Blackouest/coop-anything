@@ -7171,29 +7171,36 @@
   engine: IW 4.0 (Call of Duty)
   project: mw2_coop
   url: https://github.com/stxlvn/mw2_coop
-  other_urls: []
+  other_urls:
+  - https://github.com/stxlvn/mw2_coop/releases
+  - https://www.nexusmods.com/codmw2/mods/99
   kind: mod
-  status: prototype
+  status: partial
   coop_scope:
     players_visible: yes
     story: partial
-    enemies: unknown
-    world_state: unknown
-    items: synced weapons
+    enemies: yes
+    world_state: yes
+    items: per-player
   players: 2
   networking: direct-ip
   open_source: 'yes'
   last_activity: 2026-10
   qa: automated
-  notes: Work in progress. MIT prototype for the 64-bit Steam build. A winmm.dll proxy plus load-time
-    GSC patches on top of the game's own lockstep Spec Ops co-op netcode. Two copies play S.S.D.D.
-    together (checkpoints, restart when both are down, saved progress), move on to the next mission
-    together and share the Team Player convoy Humvee (turret for whoever boards first, seat swap) and
-    the Wolverines! Humvee rides; in-game QA passes on both machines. Other missions not done; not
-    playable through yet. Write-up in games/modern-warfare-2.
+  notes: Beta (v0.5.0-beta), playable. MIT mod for the 64-bit Steam build. A winmm.dll proxy plus load-time
+    GSC patches on top of the game's own lockstep Spec Ops co-op netcode, hosted and joined from the
+    game's menus (lobby, LAN list, address, Steam invite). Every set piece is reworked for two players, among them S.S.D.D.,
+    Team Player, Wolverines!, the rope and rappel scenes (Gulag, Just Like Old Times, Escape from Favela), Takedown's car, The Only Easy Day's swim, Cliffhanger's climb and
+    snowmobiles, No Russian, Second Sun's crash and ISS, Loose Ends' betrayal, Endgame's boat and knife
+    fight; enemies fight both players, both play the difficulty the host picks, friendly fire is a lobby switch and every level has checkpoints. The game's co-op runs in lockstep (both PCs run the same level), so the world
+    is shared. In-game QA on two copies, including a bot tour of the start points of all 19 levels (the Museum epilogue still fails for player 2); two people played parts of the story on two PCs, from the start up to and including No Russian. The missions after it were checked by bots only; not played through end to end yet. Write-up in
+    games/modern-warfare-2.
   sources:
   - https://github.com/stxlvn/mw2_coop
-  checked: '2026-10-20'
+  - https://github.com/stxlvn/mw2_coop/releases
+  - https://github.com/cranebeaker/coop-anything/tree/main/games/modern-warfare-2
+  checked: '2026-10-25'
+  made_with_coop_anything: true
 - game: Celeste
   year: 2018
   engine: XNA/FNA
