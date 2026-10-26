@@ -15,7 +15,8 @@ This is the original Gedonia, not Gedonia 2 (which has official co-op).
 Two or more players can play the open world and the story together over Steam (friends, in-game invites,
 relay) or in the home network. Players, enemies, story, conversations, loot spots, world events,
 expeditions with their generated dungeons, time and weather are shared. Every feature has an automated
-two-client scenario; the owner's first real two-PC sessions over Steam went fine. Status: alpha (0.6.1).
+two-client scenario; the owner's real sessions with friends over Steam went fine, and the points they
+found (0.6.x) are fixed in 0.7.x. Status: alpha (0.7.1).
 
 ## Existing work
 
@@ -68,16 +69,32 @@ All in the [Gedonia Co-op](https://github.com/Zerbith/gedonia-coop) plugin; each
   Speed parameter error 0), look signature hash checked on both sides, gear/helmet/cloak/mod weapons,
   Steam name, world map/minimap/compass markers.
 - **Enemies** (fight, apart, lossy, death): presence reports, host picks one owner per enemy with epochs
-  and a hold time; the owner publishes, others mirror and send damage requests; deaths everywhere with
-  XP and loot per player. `scripts/check-ownership.ps1` fails if an enemy is owned twice in a row.
-  Bug found: an exception on an enemy whose cell had unloaded aborted the rest of an ownership message.
+  and a hold time; the owner publishes, others mirror and send damage requests; deaths run everywhere,
+  so every player gets a lootable body of their own. `scripts/check-ownership.ps1` fails if an enemy is
+  owned twice in a row. Bug found: an exception on an enemy whose cell had unloaded aborted the rest of an
+  ownership message. Bug found by players: looting writes "0" for the body into the world database, and
+  the host's world-state sync deleted the body at everyone else; now a dead body stays until looted there.
+- **Shared XP** (effects): `PlayerScript.AddExperience` multiplies by intellect, rings, sleep and dungeon
+  blessings, so equal kills gave different XP and levels drifted apart. Copied deaths give no XP; the
+  machine where the enemy really dies sends the amount it gained, and players within 100 m add exactly
+  that (level-ups through the game's own loop).
 - **Story** (story, latejoin): a Harmony transpiler swaps the `SendMessage` in the answer/trigger sites for
   a dispatcher; the host numbers story calls and every machine runs the same function in that order;
   quest digests repair anyone who fell behind; the world database changes are sent to late joiners.
 - **Shared conversations** (dialogue): conversations are announced; players near the NPC join with F;
   clicks are votes; agreement decides at once, otherwise the starter's vote after a configurable time
-  (or only agreement); an answer's stat requirement is met if any member meets it, money/items by all;
-  only the leader dispatches the story function.
+  (or only agreement); an answer's stat requirement is met if any member meets it; money/item costs
+  need one member who has them and only that member pays (the story function runs everywhere, so on
+  all other machines item removals are skipped and gold is given back for that call); only the leader
+  dispatches the story function.
+- **Effects and transformations** (effects): `Object.Instantiate` of `PlayerScript.effectsGos` prefabs
+  and `ParticleSystem.Play` on the player are sent; receivers build the prefab under an inactive holder
+  and strip every script except visual ones and every collider before it wakes, so copies never deal
+  damage. Werewolf, blood demon and elemental forms are separate bodies from the same prefab list; the
+  transformed player streams body, position and every Animator state, others show a copy instead of
+  the puppet.
+- **Cutscenes**: `TimelineCutsceneController.StartCutscene` is held in co-op; every player holds the
+  interaction key until a ring fills, then the host starts it for all. Others are hidden while it plays.
 - **Loot** (loot, farloot, chestgold, chestlid): a lock per container from the host, takes broadcast and
   applied by item; containers that are not loaded apply them when they load.
 - **World events and expeditions** (event, eventhandover, expedition, expfull): the event owner spawns,
@@ -89,7 +106,8 @@ All in the [Gedonia Co-op](https://github.com/Zerbith/gedonia-coop) plugin; each
   **sounds** (Harmony postfix on `AudioSource.PlayOneShot/Play`: clip name and path sent, played on the
   puppet or mirror), **pause** (the pause menu no longer stops time in co-op), **respawn crystals**
   (respawn, respawnnorth: the game only has a reload on death, which would turn back the world; in
-  co-op the fallen player gets up at a crystal bound with F).
+  co-op the fallen player gets up at a crystal bound with F; crystals stand at measured spots, because
+  searching a dry spot on each PC put one into a pond whose water streamed in late on a slower PC).
 
 ## QA
 
@@ -97,15 +115,18 @@ All in the [Gedonia Co-op](https://github.com/Zerbith/gedonia-coop) plugin; each
   (the second is hard links; each has its own Unity product name, so saves and settings are separate)
   with a fixed test save, runs timed test steps and bots in both, and logs what each side observed
   (positions, animation, look signatures, ownership, story events, votes) plus screenshots.
-- 34 scenarios. Last runs 2026-10-24 to 2026-10-26 on the 0.6.x code: dialogue (5 runs: timer,
-  agreement, charisma check covered by the friend, refused gold answer, story function once, leader
-  leaving), respawn, pause, travellers, fight with sounds; each with 0 errors in both BepInEx logs.
+- 35 scenarios. Last runs 2026-10-26 on the 0.7.x code: dialogue (gold answer paid by the friend only,
+  host's gold unchanged, mercenary joins the payer), effects (UDP and Steam mock: friend's slashes and
+  host's spells shown on the other side, both players 33 -> 183 XP with intellect 2 vs 8, a body looted
+  by the host still lootable at the friend), transformations (all six forms shown, puppet hidden),
+  cutscene (held until both held the key, started on both within 10 ms; letting go early resets the
+  ring), respawn at the measured crystal, story; 0 errors in both BepInEx logs.
   Earlier milestones (enemies with 20 % packet loss, expedition phases, late join) are listed in the
   mod repository's history.
 - After every run the real saves and registry values were compared with a backup (unchanged).
 - Real mouse clicks in the test windows were not automated (desktop control was not used). The owner
-  used the menus by hand in real two-PC sessions up to 0.5.x; the shared-conversation buttons (0.6) have
-  not been clicked by hand yet.
+  and friends used the menus and shared conversations by hand in real sessions up to 0.6.x; the 0.7
+  additions (hold-to-confirm ring, transformations) are only tested by the automated scenarios so far.
 
 ## How to play
 
@@ -116,11 +137,11 @@ Everyone needs the same mod version.
 
 ## Known issues
 
-- Story cutscenes and story teleports move every player.
+- Story teleports move every player.
 - Steam's overlay invite may not open when the game is started outside Steam; the in-game friend list
   works.
 - Arena, Survival and Dungeon mode (separate main-menu modes) are not tuned for co-op.
-- Effects that only exist as visuals on one machine can be silent for the others.
+- Other players' companions stay visible during a cutscene.
 - The "Uncharted Islands" cannot be reached in this game version (no travel route).
 
 ## Next steps
